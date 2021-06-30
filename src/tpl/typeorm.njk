@@ -1,0 +1,36 @@
+{% macro createObject(fields) %} {
+  {% for field in fields %}{{createField(field)}}{% endfor %}
+}{% endmacro %}
+{% macro createField(field) %}
+  {%- if (field.desc) %}/** {{field.desc}} */{% endif %}
+  {% if (field.sqlType) %}@Column({{field.sqlType|safe}}){% endif %}
+  {% if (field.refType) %}{{field.refType|safe}}{% endif %}
+  {% if (field.name) %}{{field.name}}{%if not(field.required)%}?{% endif %}: {% endif %}
+  {%- if (field.type === 'object' or field.type === 'map') -%}
+    {{createObject(field.fields)}}
+  {%- elif (field.type === 'array') -%}
+    [{{createField(field.fields[0])}}]
+  {%- else -%}
+    {% if (field.objType) %}{{createObject(field.objType)}}
+    {% elif (field.jsType) %}{{field.jsType|safe}}
+    {% else %}{{field.type}}
+    {% endif %}
+  {%- endif %}
+{% endmacro %}
+/** 由 @graphi/nestjs/model.generator.ts 生成，不要手动修改 */
+import { Entity, Column, PrimaryGeneratedColumn{% if (relatedTypes) %}, {{relatedTypes}}{% endif %} } from 'typeorm'
+{% for imp in imports -%}
+{{imp|safe}}
+{% endfor %}
+
+@Entity()
+export class {{name}} {
+  {% if (primaryId) %}
+  /** 主键 */
+  @PrimaryGeneratedColumn({{primaryId.sqlType|safe}})
+  id: {{primaryId.jsType}}
+  {% endif %}
+  {% for field in fields %}
+  {{createField(field)}}
+  {% endfor %}
+}
