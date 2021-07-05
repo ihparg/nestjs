@@ -1,9 +1,9 @@
-import { readFile, writeFile } from 'fs/promises'
-import { existsSync, mkdirSync } from 'fs'
-import { dirname, join } from 'path'
+import { readFile } from 'fs/promises'
+import { join } from 'path'
 import { compile } from 'nunjucks'
-import { IProperties, IProperty, ISchema } from './interface'
-import { getField as getFieldInterface } from './interface.generator'
+import { IProperties, IProperty, ISchema } from '../interface'
+import { getField as getFieldInterface } from './interface'
+import { eslintFix, writeFileFix, getFileName } from './utils'
 
 interface IFieldType {
   sqlType: any
@@ -43,20 +43,29 @@ export class TypeOrmGenerator {
       fields: this.getFields(props),
       relatedTypes: Object.keys(this.relatedTypes).join(','),
       imports: this.getImports(),
+      tableName:
+        this.name[0].toLowerCase() +
+        this.name
+          .slice(1)
+          .replace(/([A-Z])/g, '_$1')
+          .toLowerCase(),
     }
     const tpl = compile(njk)
     const content = tpl.render(options)
-    const path = compile(this.path).render(this.schema)
-    const dir = dirname(path)
-    if (!existsSync(dir)) mkdirSync(dir)
-    return writeFile(path, content)
+    const path =
+      compile(this.path).render({
+        tag: this.schema.tag,
+        name: getFileName(this.name, 'entity'),
+      }) + '.ts'
+    await writeFileFix(path, content)
+    eslintFix(path)
   }
 
   getImports() {
     const imports = []
     Object.keys(this.relatedEntities).forEach((k) => {
       const pkg = compile(this.path).render({ ...this.schema, name: k })
-      const [, , file] = /(.+\/)*(.+)\.(.+)$/.exec(pkg)
+      const file = getFileName(pkg.slice(pkg.lastIndexOf('/') + 1), 'entity')
       imports.push(`import { ${this.relatedEntities[k]} } from './${file}'`)
     })
     return imports

@@ -58,7 +58,7 @@ $duration: 1.4s;
     stroke-dashoffset: $offset;
   }
   50% {
-    stroke-dashoffset: $offset / 4;
+    stroke-dashoffset: math.div($offset, 4);
     transform: rotate(135deg);
   }
   100% {

@@ -298,7 +298,7 @@ export default {
     content: '';
     display: block;
     left: 0;
-    margin-top: calc(-1 * (50% - #{$ui-button-height / 2}));
+    margin-top: calc(-1 * (50% - #{math.div($ui-button-height, 2)}));
     padding-top: 100%; // 1:1 aspect ratio - makes height the same as button width
     position: relative;
     top: 0;

@@ -27,6 +27,9 @@ export interface IRoute {
   responseHeaders?: IProperty
   refs: Array<string>
   fullPath?: string
+  tag: string
+  functionName: string
+  resolve: string
 }
 
 export interface ISchema {
@@ -47,3 +50,5 @@ export interface Response<T> {
   message?: string
   data: T
 }
+
+export type UidFunction = () => string

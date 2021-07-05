@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
+    "build:web": "cd dev-web && yarn && yarn build",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -19,7 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "copy:tpl": "cpx 'src/tpl/**/*' 'dist/tpl' --watch"
+    "copy:tpl": "cpx 'src/generators/tpl/**/*' 'dist/generators/tpl' --watch"
   },
   "dependencies": {
     "@nestjs/common": "^7.6.15",

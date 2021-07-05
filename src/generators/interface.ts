@@ -1,7 +1,8 @@
-import { readFile, writeFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { compile } from 'nunjucks'
-import { ISchema, IProperties, IProperty } from './interface'
+import { ISchema, IProperties, IProperty } from '../interface'
+import { writeFileFix, eslintFix } from './utils'
 
 interface IField {
   name: string
@@ -86,5 +87,6 @@ export const generateInterface = async (
     }
   })
   const content = tpl.render({ schemas: list })
-  await writeFile(filePath, content)
+  await writeFileFix(filePath, content)
+  eslintFix(filePath)
 }

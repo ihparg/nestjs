@@ -2,9 +2,10 @@ import { join } from 'path'
 import { customAlphabet } from 'nanoid'
 import { readdir, readFile, writeFile, unlink } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
+import { UidFunction } from './interface'
+import { resolvable } from './resolvable'
 
-type UidFunction = () => string
-
+@resolvable
 export class DevService {
   nextUid: UidFunction
 

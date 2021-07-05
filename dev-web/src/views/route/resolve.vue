@@ -17,10 +17,6 @@
           <v-icon name="refresh" size="1rem" />
           刷新
         </a>
-        <div style="flex:1;" />
-        <ui-checkbox :value="graphqlDisabled" style="margin: 0;" @input="graphqlToggle">
-          跳过Graphql
-        </ui-checkbox>
       </div>
     </div>
   </div>

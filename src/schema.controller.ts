@@ -1,10 +1,17 @@
-import { Body, Controller, Get, Post, UseInterceptors } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Delete,
+  UseInterceptors,
+} from '@nestjs/common'
 import { join } from 'path'
 import { DevService } from './dev.service'
 import { TransformInterceptor } from './interceptor'
-import { ISchema } from './interface'
-import { generateInterface } from './interface.generator'
-import { TypeOrmGenerator } from './typeorm.generator'
+import { ISchema, IDeleteBody } from './interface'
+import { generateInterface } from './generators/interface'
+import { TypeOrmGenerator } from './generators/typeorm'
 
 const isERModel = (type) =>
   ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
@@ -21,12 +28,6 @@ export class SchemaController {
   @Get('/list')
   async getList(): Promise<Array<ISchema>> {
     const schemas = await this.devService.getJsonFileList(this.dir)
-
-    await generateInterface(
-      schemas,
-      join(process.cwd(), process.env.INTERFACE_PATH),
-    )
-
     return schemas
   }
 
@@ -38,18 +39,30 @@ export class SchemaController {
       body,
     )
 
-    const { INTERFACE_PATH, TYPEORM_ENTITY_PATH } = process.env
+    const { DEV_INTERFACE_PATH, DEV_TYPEORM_ENTITY_PATH } = process.env
 
     const schemas = await this.getList()
-    if (INTERFACE_PATH) {
-      await generateInterface(schemas, join(process.cwd(), INTERFACE_PATH))
+    if (DEV_INTERFACE_PATH) {
+      await generateInterface(schemas, join(process.cwd(), DEV_INTERFACE_PATH))
     }
 
-    if (TYPEORM_ENTITY_PATH && isERModel(body.tag)) {
-      const typeorm = new TypeOrmGenerator(body, TYPEORM_ENTITY_PATH, schemas)
-      await typeorm.generate()
+    if (DEV_TYPEORM_ENTITY_PATH && isERModel(body.tag)) {
+      new TypeOrmGenerator(body, DEV_TYPEORM_ENTITY_PATH, schemas).generate()
     }
 
     return body
+  }
+
+  @Delete('/')
+  async deleteRoute(@Body() body: IDeleteBody) {
+    await this.devService.deleteFile(
+      this.devService.resolvePath(this.dir, body.id),
+    )
+
+    const { DEV_INTERFACE_PATH } = process.env
+    const schemas = await this.getList()
+    if (DEV_INTERFACE_PATH) {
+      await generateInterface(schemas, join(process.cwd(), DEV_INTERFACE_PATH))
+    }
   }
 }

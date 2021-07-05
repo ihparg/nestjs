@@ -7,6 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { DevService } from './dev.service'
+import { ControllerGenerator } from './generators/controller'
 import { TransformInterceptor } from './interceptor'
 import { IRoute, IDeleteBody } from './interface'
 
@@ -31,6 +32,13 @@ export class RouteController {
       this.devService.resolvePath(this.dir, body.id),
       body,
     )
+
+    const routes = await this.getList()
+    const { DEV_CONTROLLER_PATH } = process.env
+    if (DEV_CONTROLLER_PATH) {
+      new ControllerGenerator(routes, body.tag).generate(DEV_CONTROLLER_PATH)
+    }
+
     return body
   }
 
