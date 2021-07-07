@@ -15,8 +15,8 @@
           </span>
           {{ r.path }}
         </div>
-        <span v-if="r.tag" class="tag" @click.stop.prevent="tagClick(r.tag)">
-          {{ r.tag }}
+        <span v-if="r.module" class="module" @click.stop.prevent="moduleClick(r.module)">
+          {{ r.module }}
         </span>
       </router-link>
     </div>
@@ -40,14 +40,14 @@ export default {
     filterList() {
       const { filter } = this
       if (filter) {
-        return this.list.filter(d => d.tag === filter || fuzzysearch(filter, d.title + d.path))
+        return this.list.filter(d => d.module === filter || fuzzysearch(filter, d.title + d.path))
       }
       return this.list
     },
   },
   methods: {
-    tagClick(tag) {
-      this.filter = tag
+    moduleClick(module) {
+      this.filter = module
     },
   },
 }
@@ -85,7 +85,7 @@ export default {
   border-bottom: solid 1px rgba(0, 0, 0, 0.05);
   align-items: center;
 
-  .tag {
+  .module {
     position: absolute;
     right: 1rem;
     top: 0.5rem;
@@ -111,7 +111,7 @@ export default {
   color: #fff;
 
   .path,
-  .tag {
+  .module {
     color: #fff;
   }
 }

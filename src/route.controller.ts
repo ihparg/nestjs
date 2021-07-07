@@ -29,10 +29,17 @@ export class RouteController {
       body,
     )
 
-    const routes = await this.getList()
     const { DEV_CONTROLLER_PATH } = process.env
     if (DEV_CONTROLLER_PATH) {
-      new ControllerGenerator(routes).generate(body, DEV_CONTROLLER_PATH)
+      const routes = await this.getList()
+      const schemas = await this.devService.getJsonFileList(
+        process.env.DEV_SCHEMA_PATH || 'data/schemas',
+      )
+
+      new ControllerGenerator(routes, schemas).generate(
+        body,
+        DEV_CONTROLLER_PATH,
+      )
     }
 
     return body

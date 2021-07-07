@@ -1,8 +1,9 @@
 import { join } from 'path'
 import { compile } from 'nunjucks'
 import { readFile } from 'fs/promises'
-import { IRoute, IProperty } from '../interface'
+import { IRoute, IProperty, ISchema } from '../interface'
 import { resolvePath } from '../resolvable'
+import { DtoGenerator } from './dto'
 import {
   eslintFix,
   getFileName,
@@ -21,10 +22,12 @@ export class ControllerGenerator {
     }
   }
   private imports: { [key: string]: boolean }
+  private dtoGenerator: DtoGenerator
 
-  constructor(routes: Array<IRoute>) {
+  constructor(routes: Array<IRoute>, schemas: Array<ISchema>) {
     this.routes = routes
     this.services = {}
+    this.dtoGenerator = new DtoGenerator(schemas)
   }
 
   private resolveService(str: string) {
@@ -81,6 +84,7 @@ export class ControllerGenerator {
         responseHeader: this.handleResponseHeader(r.responseHeaders),
         requestHeaderDto: {},
         service: this.resolveService(r.resolve),
+        ...this.dtoGenerator.generate(r),
         ...this.splitPath(r),
       })
       this.imports[r.method] = true
