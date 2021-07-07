@@ -2,10 +2,10 @@ const { resolve } = require('path')
 
 module.exports = {
   devServer: {
-    port: 7000,
+    port: 3001,
     proxy: {
       '^/dev': {
-        target: 'http://localhost:7001',
+        target: 'http://localhost:3000',
         ws: true,
         changeOrigin: true,
       },

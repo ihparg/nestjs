@@ -27,7 +27,7 @@ export interface IRoute {
   responseHeaders?: IProperty
   refs: Array<string>
   fullPath?: string
-  tag: string
+  module: string
   functionName: string
   resolve: string
 }

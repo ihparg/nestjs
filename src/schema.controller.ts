@@ -1,14 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Delete,
-  UseInterceptors,
-} from '@nestjs/common'
+import { Body, Controller, Get, Post, Delete } from '@nestjs/common'
 import { join } from 'path'
 import { DevService } from './dev.service'
-import { TransformInterceptor } from './interceptor'
 import { ISchema, IDeleteBody } from './interface'
 import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
@@ -17,7 +9,6 @@ const isERModel = (type) =>
   ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
 @Controller('dev/schema')
-@UseInterceptors(TransformInterceptor)
 export class SchemaController {
   constructor(private readonly devService: DevService) {}
 

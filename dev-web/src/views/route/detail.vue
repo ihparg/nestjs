@@ -9,6 +9,7 @@
       :route="route"
       :schemas="schemas"
       :rid="rid"
+      :api-prefix="routeConfig.prefix"
     />
     <v-fab-add
       v-if="!editable"
@@ -37,6 +38,7 @@ export default {
   computed: {
     ...mapGetters('route', { routes: 'sortedRoutes' }),
     ...mapState('schema', { schemas: 'data' }),
+    ...mapState('route', { routeConfig: 'config' }),
     route() {
       if (this.rid === '0') return {}
       return this.routes.find(r => r.id === this.rid)
@@ -45,7 +47,7 @@ export default {
       return this.$route.params.rid
     },
     isReady() {
-      return this.routes && this.schemas
+      return this.routes && this.schemas && this.routeConfig
     },
   },
   watch: {
@@ -56,9 +58,10 @@ export default {
   created() {
     this.fetchRoutes()
     this.fetchSchemas()
+    this.fetchConfig()
   },
   methods: {
-    ...mapActions('route', { fetchRoutes: 'fetchList' }),
+    ...mapActions('route', { fetchRoutes: 'fetchList', fetchConfig: 'fetchConfig' }),
     ...mapActions('schema', { fetchSchemas: 'fetchAll' }),
   },
 }

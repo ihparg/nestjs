@@ -1,6 +1,19 @@
 import { Controller, {{imports}} } from '@nestjs/common'
+{% for name, service in services -%}
+import { {{name}} } from '{{service.import}}'
+{% endfor %}
 
-@Controller('{{tag}}')
+@Controller('{{controllerPath}}')
 export class {{controllerName}}Controller {
-  constructor() {}
+  constructor({% for name, s in services %}private readonly {{s.name}}: {{name}}{% endfor %}) {}
+  {% for route in routes %}
+  {% if route.desc %}/** {{route.desc}} */{% endif %}
+  @{{route.method}}('{{route.pathname}}')
+  {% for k, v in route.responseHeader %}
+  @Header('{{k}}', '{{v}}')
+  {% endfor %}
+  async {{route.functionName}}() {
+    await this.{{route.service.name}}.{{route.service.method}}()
+  }
+  {% endfor %}
 }

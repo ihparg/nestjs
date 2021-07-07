@@ -26,8 +26,8 @@
           />
 
           <v-input
-            name="tag"
-            label="Tag"
+            name="module"
+            label="Module"
             type="autocomplete"
             :suggestions="groups"
             default-value=""
@@ -42,7 +42,8 @@
             required
             :rules="[rule.required, rule.path, rule.pathExist]"
             style="flex: 1;"
-            help="以 / 开头，不要包含域名"
+            help="格式为 /{controller}/{path:可选}/{method:如果为空，使用method}"
+            :prefix="prefix"
             @input="pathChange"
           />
 
@@ -116,6 +117,7 @@ registerInput('resolve', Rosolve)
 
 export default {
   props: {
+    apiPrefix: String,
     editable: Boolean,
     rid: String,
     route: Object,
@@ -128,7 +130,7 @@ export default {
     const { rid } = this
     const existedPath = {}
     this.routes.forEach(r => {
-      if (r.tag) groups[r.tag] = true
+      if (r.module) groups[r.module] = true
       if (rid !== r.id) existedPath[r.fullPath] = true
     })
 
@@ -182,6 +184,10 @@ export default {
         }
       })
       return length
+    },
+    prefix() {
+      const { module } = this.value
+      return `${this.apiPrefix ? this.apiPrefix : ''}${module ? `/${module}` : ''}`
     },
   },
   watch: {

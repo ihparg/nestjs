@@ -1,18 +1,9 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Post,
-  UseInterceptors,
-} from '@nestjs/common'
+import { Body, Controller, Delete, Get, Post } from '@nestjs/common'
 import { DevService } from './dev.service'
 import { ControllerGenerator } from './generators/controller'
-import { TransformInterceptor } from './interceptor'
 import { IRoute, IDeleteBody } from './interface'
 
 @Controller('dev/route')
-@UseInterceptors(TransformInterceptor)
 export class RouteController {
   constructor(private readonly devService: DevService) {}
 
@@ -23,6 +14,11 @@ export class RouteController {
   @Get('/')
   getList(): Promise<Array<IRoute>> {
     return this.devService.getJsonFileList(this.dir)
+  }
+
+  @Get('/config')
+  getConfig() {
+    return { prefix: process.env.API_PREFIX }
   }
 
   @Post('/save')
@@ -36,7 +32,7 @@ export class RouteController {
     const routes = await this.getList()
     const { DEV_CONTROLLER_PATH } = process.env
     if (DEV_CONTROLLER_PATH) {
-      new ControllerGenerator(routes, body.tag).generate(DEV_CONTROLLER_PATH)
+      new ControllerGenerator(routes).generate(body, DEV_CONTROLLER_PATH)
     }
 
     return body

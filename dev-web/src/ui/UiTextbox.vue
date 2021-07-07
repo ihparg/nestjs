@@ -8,33 +8,35 @@
 
     <div class="ui-textbox__content">
       <label class="ui-textbox__label">
-        <input
-          v-if="!multiLine"
-          ref="input"
-          v-autofocus="autofocus"
-          class="ui-textbox__input"
-          :autocomplete="autocomplete ? autocomplete : null"
-          :disabled="disabled"
-          :max="maxValue"
-          :maxlength="enforceMaxlength ? maxlength : null"
-          :minlength="minlength"
-          :min="minValue"
-          :name="name"
-          :number="type === 'number' ? true : null"
-          :placeholder="hasFloatingLabel ? null : placeholder"
-          :readonly="readonly"
-          :required="required"
-          :step="stepValue"
-          :tabindex="tabindex"
-          :type="type"
-          :value="value"
-          @blur="onBlur"
-          @change="onChange"
-          @focus="onFocus"
-          @input="updateValue($event.target.value)"
-          @keydown.enter="onKeydownEnter"
-          @keydown="onKeydown"
-        />
+        <div v-if="!multiLine" class="ui-textbox__input-wrap">
+          <div v-if="prefix">{{ prefix }}</div>
+          <input
+            ref="input"
+            v-autofocus="autofocus"
+            class="ui-textbox__input"
+            :autocomplete="autocomplete ? autocomplete : null"
+            :disabled="disabled"
+            :max="maxValue"
+            :maxlength="enforceMaxlength ? maxlength : null"
+            :minlength="minlength"
+            :min="minValue"
+            :name="name"
+            :number="type === 'number' ? true : null"
+            :placeholder="hasFloatingLabel ? null : placeholder"
+            :readonly="readonly"
+            :required="required"
+            :step="stepValue"
+            :tabindex="tabindex"
+            :type="type"
+            :value="value"
+            @blur="onBlur"
+            @change="onChange"
+            @focus="onFocus"
+            @input="updateValue($event.target.value)"
+            @keydown.enter="onKeydownEnter"
+            @keydown="onKeydown"
+          />
+        </div>
 
         <textarea
           v-else
@@ -168,6 +170,9 @@ export default {
     disabled: {
       type: Boolean,
       default: false,
+    },
+    prefix: {
+      type: String,
     },
     style: {
       type: [String, Object],
@@ -498,6 +503,7 @@ export default {
   color: $ui-input-text-color;
   cursor: auto;
   display: block;
+  flex: 1;
   font-family: inherit;
   font-size: $ui-input-text-font-size;
   font-weight: normal;
@@ -532,6 +538,11 @@ export default {
   position: absolute;
   right: 0;
   top: $ui-input-feedback-padding-top;
+}
+
+.ui-textbox__input-wrap {
+  display: flex;
+  align-items: center;
 }
 
 // ================================================

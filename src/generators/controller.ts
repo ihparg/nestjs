@@ -1,49 +1,87 @@
 import { join } from 'path'
 import { compile } from 'nunjucks'
 import { readFile } from 'fs/promises'
-import { IRoute } from '../interface'
+import { IRoute, IProperty } from '../interface'
+import { resolvePath } from '../resolvable'
 import {
   eslintFix,
   getFileName,
-  toCamelCase,
   toCapital,
   writeFileFix,
   getInstanceName,
 } from './utils'
 
 export class ControllerGenerator {
-  private tag: string
   private routes: Array<IRoute>
-  private services: { [key: string]: string }
+  private services: {
+    [key: string]: {
+      name: string
+      method: string
+      import: string
+    }
+  }
   private imports: { [key: string]: boolean }
 
-  constructor(routes: Array<IRoute>, tag: string) {
-    this.routes = routes.filter((r) => r.tag === tag)
-    this.tag = tag
+  constructor(routes: Array<IRoute>) {
+    this.routes = routes
     this.services = {}
   }
 
   private resolveService(str: string) {
     const [service, method] = str.split('.')
-    this.services[service] = getInstanceName(service)
-    return { service: getInstanceName(service), method }
+    const result = {
+      name: getInstanceName(service),
+      method,
+      import: resolvePath[service] ?? './' + getFileName(service, 'service'),
+    }
+
+    this.services[service] = result
+
+    return result
   }
 
-  async generate(path: string) {
+  private splitPath({ path, method, module }) {
+    const splitedPath = path.replace(/^\/|\/$/g, '').split('/')
+    return {
+      module,
+      controller: splitedPath.shift(),
+      pathname: '/' + splitedPath.join('/'),
+      functionName: splitedPath.pop() || method?.toLowerCase(),
+    }
+  }
+
+  private handleResponseHeader(header: IProperty) {
+    if (!header || !header.properties) return null
+    const obj = {}
+    Object.keys(header.properties).forEach((key) => {
+      const value = header.properties[key].defaultValue
+      if (value) {
+        obj[key] = value
+      }
+      this.imports.Header = true
+    })
+    return obj
+  }
+
+  async generate(route: IRoute, dir: string) {
+    const { module, controller } = this.splitPath(route)
+
     const routes = []
     this.imports = {}
     this.routes.forEach((r) => {
+      if (r.module !== module || r.path.split('/')[1] !== controller) return
+
       routes.push({
-        functionName: r.functionName,
         desc: r.description,
-        method: r.method,
+        method: toCapital(r.method),
         responseDto: {},
         bodyDto: {},
         queryDto: {},
         paramsDto: {},
-        responseHeader: {},
+        responseHeader: this.handleResponseHeader(r.responseHeaders),
         requestHeaderDto: {},
         service: this.resolveService(r.resolve),
+        ...this.splitPath(r),
       })
       this.imports[r.method] = true
     })
@@ -52,23 +90,19 @@ export class ControllerGenerator {
     const options = {
       routes,
       services: this.services,
-      tag: this.tag,
-      controllerName: toCapital(toCamelCase(this.tag.replace(/\//g, '_'))),
+      controllerPath: '/' + (module ? module + '/' : '') + controller,
+      controllerName: toCapital(controller),
       imports: Object.keys(this.imports)
-        .map((m) => toCamelCase(m))
+        .map((m) => toCapital(m))
         .join(','),
     }
 
     const content = compile(njk).render(options)
-
-    const lastIndex = this.tag.lastIndexOf('/') + 1
-    const fileName = getFileName(this.tag.slice(lastIndex), 'controller')
+    const fileName = getFileName(controller, 'controller')
     // 完整路径
-    path = join(compile(path).render({ tag: this.tag }), fileName + '.ts')
+    dir = join(dir, module, controller, fileName + '.ts')
 
-    console.log('path', path)
-
-    await writeFileFix(path, content)
-    eslintFix(path)
+    await writeFileFix(dir, content)
+    eslintFix(dir)
   }
 }

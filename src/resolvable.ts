@@ -1,7 +1,9 @@
 export const resolves = []
+export const resolvePath = {}
 
-export const resolvable = (target) => {
+export const resolvable = (dir?: string) => (target) => {
   const service = target.name
+  resolvePath[service] = dir
   Object.getOwnPropertyNames(target.prototype).forEach((f) => {
     if (f === 'constructor') return
     resolves.push(`${service}.${f}`)

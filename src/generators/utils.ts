@@ -27,6 +27,7 @@ export const toUnderscore = (str: string): string => {
 }
 
 export const toCapital = (str: string): string => {
+  str = str.toLowerCase()
   return str[0].toUpperCase() + str.slice(1)
 }
 
@@ -46,6 +47,5 @@ export const getFileName = (str: string, type?: string): string => {
     ss.pop()
   }
   const endFix = type ? '.' + type : ''
-  console.log(str, ss)
   return ss.join('-') + endFix
 }

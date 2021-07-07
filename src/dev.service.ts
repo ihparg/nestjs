@@ -5,7 +5,7 @@ import { existsSync, mkdirSync } from 'fs'
 import { UidFunction } from './interface'
 import { resolvable } from './resolvable'
 
-@resolvable
+@resolvable('src/dev.service')
 export class DevService {
   nextUid: UidFunction
 
