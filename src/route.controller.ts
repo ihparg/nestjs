@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Post } from '@nestjs/common'
 import { DevService } from './dev.service'
 import { ControllerGenerator } from './generators/controller'
-import { IRoute, IDeleteBody } from './interface'
+import { Route, DeleteBody } from './interface'
 
 @Controller('dev/route')
 export class RouteController {
@@ -12,7 +12,7 @@ export class RouteController {
   }
 
   @Get('/')
-  getList(): Promise<Array<IRoute>> {
+  getList(): Promise<Array<Route>> {
     return this.devService.getJsonFileList(this.dir)
   }
 
@@ -22,7 +22,7 @@ export class RouteController {
   }
 
   @Post('/save')
-  async saveRoute(@Body() body: IRoute): Promise<IRoute> {
+  async saveRoute(@Body() body: Route): Promise<Route> {
     if (!body.id) body.id = this.devService.nextUid()
     await this.devService.saveFile(
       this.devService.resolvePath(this.dir, body.id),
@@ -46,7 +46,7 @@ export class RouteController {
   }
 
   @Delete('/')
-  async deleteRoute(@Body() body: IDeleteBody) {
+  async deleteRoute(@Body() body: DeleteBody) {
     await this.devService.deleteFile(
       this.devService.resolvePath(this.dir, body.id),
     )

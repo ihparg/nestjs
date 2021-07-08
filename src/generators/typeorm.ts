@@ -1,11 +1,11 @@
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { compile } from 'nunjucks'
-import { IProperties, IProperty, ISchema } from '../interface'
+import { Properties, Property, Schema } from '../interface'
 import { getField as getFieldInterface } from './interface'
 import { eslintFix, writeFileFix, getFileName } from './utils'
 
-interface IFieldType {
+interface FieldType {
   sqlType: any
   jsType?: string
   objType?: any
@@ -21,10 +21,10 @@ export class TypeOrmGenerator {
   private name: string
   private className: string
   private path: string
-  private schema: ISchema
-  private schemas: Array<ISchema>
+  private schema: Schema
+  private schemas: Array<Schema>
 
-  constructor(schema: ISchema, path: string, schemas: Array<ISchema>) {
+  constructor(schema: Schema, path: string, schemas: Array<Schema>) {
     this.relatedTypes = {}
     this.relatedEntities = {}
     this.name = schema.name
@@ -71,7 +71,7 @@ export class TypeOrmGenerator {
     return imports
   }
 
-  private getField(prop: IProperty, name: string) {
+  private getField(prop: Property, name: string) {
     if (prop.type === 'ref') {
       return this.getRef(prop, name, false)
     } else if (prop.type === 'array' && prop.items[0].type === 'ref') {
@@ -84,7 +84,7 @@ export class TypeOrmGenerator {
     }
   }
 
-  private getFields(props: IProperties) {
+  private getFields(props: Properties) {
     const fields = []
     Object.keys(props).forEach((name) => {
       const p = props[name]
@@ -95,9 +95,9 @@ export class TypeOrmGenerator {
     return fields
   }
 
-  private getType(prop: IProperty) {
+  private getType(prop: Property) {
     if (!prop) return undefined
-    let type: IFieldType
+    let type: FieldType
     switch (prop.type) {
       case 'uuid':
         type = { jsType: 'string', sqlType: 'uuid' }
@@ -132,7 +132,7 @@ export class TypeOrmGenerator {
     return type
   }
 
-  private getRef(prop: IProperty, name: string, isMany: boolean) {
+  private getRef(prop: Property, name: string, isMany: boolean) {
     const { ref } = prop
     const refClassName = ref[0].toUpperCase() + ref.slice(1)
     const target = this.schemas.find((s) => s.name === ref)

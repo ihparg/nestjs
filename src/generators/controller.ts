@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { compile } from 'nunjucks'
 import { readFile } from 'fs/promises'
-import { IRoute, IProperty, ISchema } from '../interface'
+import { Route, Property, Schema } from '../interface'
 import { resolvePath } from '../resolvable'
 import { DtoGenerator } from './dto'
 import {
@@ -13,7 +13,7 @@ import {
 } from './utils'
 
 export class ControllerGenerator {
-  private routes: Array<IRoute>
+  private routes: Array<Route>
   private services: {
     [key: string]: {
       name: string
@@ -24,7 +24,7 @@ export class ControllerGenerator {
   private imports: { [key: string]: boolean }
   private dtoGenerator: DtoGenerator
 
-  constructor(routes: Array<IRoute>, schemas: Array<ISchema>) {
+  constructor(routes: Array<Route>, schemas: Array<Schema>) {
     this.routes = routes
     this.services = {}
     this.dtoGenerator = new DtoGenerator(schemas)
@@ -53,7 +53,7 @@ export class ControllerGenerator {
     }
   }
 
-  private handleResponseHeader(header: IProperty) {
+  private handleResponseHeader(header: Property) {
     if (!header || !header.properties) return null
     const obj = {}
     Object.keys(header.properties).forEach((key) => {
@@ -66,7 +66,7 @@ export class ControllerGenerator {
     return obj
   }
 
-  async generate(route: IRoute, dir: string) {
+  async generate(route: Route, dir: string) {
     const { module, controller } = this.splitPath(route)
 
     const routes = []
@@ -77,12 +77,7 @@ export class ControllerGenerator {
       routes.push({
         desc: r.description,
         method: toCapital(r.method),
-        responseDto: {},
-        bodyDto: {},
-        queryDto: {},
-        paramsDto: {},
         responseHeader: this.handleResponseHeader(r.responseHeaders),
-        requestHeaderDto: {},
         service: this.resolveService(r.resolve),
         ...this.dtoGenerator.generate(r),
         ...this.splitPath(r),

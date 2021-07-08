@@ -27,6 +27,7 @@ export const toUnderscore = (str: string): string => {
 }
 
 export const toCapital = (str: string): string => {
+  if (!str || str.length === 0) return ''
   str = str.toLowerCase()
   return str[0].toUpperCase() + str.slice(1)
 }

@@ -1,14 +1,14 @@
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { compile } from 'nunjucks'
-import { ISchema, IProperties, IProperty } from '../interface'
+import { Schema, Properties, Property } from '../interface'
 import { writeFileFix, eslintFix } from './utils'
 
-interface IField {
+interface Field {
   name: string
   required: boolean
   desc: string
-  fields?: Array<IField>
+  fields?: Array<Field>
   type: string
 }
 
@@ -16,7 +16,7 @@ const getInterfaceName = (name): string => {
   return 'I' + name[0].toUpperCase() + name.slice(1)
 }
 
-const convertType = (props: IProperty): string => {
+const convertType = (props: Property): string => {
   switch (props.type) {
     case 'integer':
     case 'biginteger':
@@ -39,8 +39,8 @@ const convertType = (props: IProperty): string => {
   }
 }
 
-export const getField = (prop: IProperty, name?: string): IField => {
-  const field: IField = {
+export const getField = (prop: Property, name?: string): Field => {
+  const field: Field = {
     name,
     required: prop.required,
     desc: prop.description,
@@ -63,7 +63,7 @@ export const getField = (prop: IProperty, name?: string): IField => {
   return field
 }
 
-const getFields = (props: IProperties): Array<IField> => {
+const getFields = (props: Properties): Array<Field> => {
   const fields = []
   Object.keys(props).forEach((name: string) => {
     fields.push(getField(props[name], name))
@@ -73,12 +73,12 @@ const getFields = (props: IProperties): Array<IField> => {
 }
 
 export const generateInterface = async (
-  schemas: Array<ISchema>,
+  schemas: Array<Schema>,
   filePath: string,
 ) => {
   const njk = await readFile(join(__dirname, './tpl/interface.njk'), 'utf-8')
   const tpl = compile(njk)
-  const list = schemas.map((schema: ISchema) => {
+  const list = schemas.map((schema: Schema) => {
     schema.iname = getInterfaceName(schema.name)
     return {
       iname: getInterfaceName(schema.name),

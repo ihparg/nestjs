@@ -1,30 +1,30 @@
-export interface IProperty {
+export interface Property {
   required?: boolean
   type: string
-  properties?: IProperties
+  properties?: Properties
   ref?: string
   defaultValue?: string
   exampleValue?: string
   description?: string
-  items?: Array<IProperty>
+  items?: Array<Property>
 }
 
-export interface IProperties {
-  [key: string]: IProperty
+export interface Properties {
+  [key: string]: Property
 }
 
-export interface IRoute {
+export interface Route {
   id: string
   title: string
   description?: string
   method: string
   path: string
-  queryString?: IProperty
-  routeParams?: IProperty
-  requestBody?: IProperty
-  requestHeaders?: IProperty
-  responseBody?: IProperty
-  responseHeaders?: IProperty
+  queryString?: Property
+  routeParams?: Property
+  requestBody?: Property
+  requestHeaders?: Property
+  responseBody?: Property
+  responseHeaders?: Property
   refs: Array<string>
   fullPath?: string
   module: string
@@ -32,16 +32,16 @@ export interface IRoute {
   resolve: string
 }
 
-export interface ISchema {
+export interface Schema {
   id: string
   name: string
   iname?: string
   tag: string
-  content: IProperty
+  content: Property
   description?: string
 }
 
-export interface IDeleteBody {
+export interface DeleteBody {
   id: string
 }
 

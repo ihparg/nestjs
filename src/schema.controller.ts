@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Delete } from '@nestjs/common'
 import { join } from 'path'
 import { DevService } from './dev.service'
-import { ISchema, IDeleteBody } from './interface'
+import { Schema, DeleteBody } from './interface'
 import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
 
@@ -17,13 +17,13 @@ export class SchemaController {
   }
 
   @Get('/list')
-  async getList(): Promise<Array<ISchema>> {
+  async getList(): Promise<Array<Schema>> {
     const schemas = await this.devService.getJsonFileList(this.dir)
     return schemas
   }
 
   @Post('/save')
-  async saveSchema(@Body() body: ISchema): Promise<ISchema> {
+  async saveSchema(@Body() body: Schema): Promise<Schema> {
     if (!body.id) body.id = this.devService.nextUid()
     await this.devService.saveFile(
       this.devService.resolvePath(this.dir, body.id),
@@ -45,7 +45,7 @@ export class SchemaController {
   }
 
   @Delete('/')
-  async deleteRoute(@Body() body: IDeleteBody) {
+  async deleteRoute(@Body() body: DeleteBody) {
     await this.devService.deleteFile(
       this.devService.resolvePath(this.dir, body.id),
     )
