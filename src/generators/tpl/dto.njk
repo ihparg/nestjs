@@ -1,0 +1,9 @@
+{% for name, dto in dtos %}
+{% if dto.desc %}/** {{dto.desc}} */{% endif %}
+export class {{name}} {
+  {% for field, prop in dto.fields %}
+  {% if prop.desc %}/** {{prop.desc}} */{% endif %}
+  {{field}}: {{prop.type|safe}}
+  {% endfor %}
+}
+{% endfor %}

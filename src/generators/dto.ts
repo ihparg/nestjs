@@ -1,6 +1,9 @@
+import { join } from 'path'
+import { readFile } from 'fs/promises'
+import { compile } from 'nunjucks'
 import { Properties, Property, Route, Schema } from '../interface'
 import { flattenSchemas } from './schema'
-import { toCapital } from './utils'
+import { eslintFix, getFileName, toCapital, writeFileFix } from './utils'
 
 export const getDtoName = (): string => {
   return ''
@@ -18,15 +21,23 @@ interface Dto {
   type?: string
 }
 
+interface Option {
+  controller: string
+  module: string
+  functionName: string
+}
+
 export class DtoGenerator {
   private schemas: { [key: string]: Property }
   // 临时存储引用，处理循环引用
   private tempRefs: { [key: string]: string }
   private tempName: string
   private dtos: { [key: string]: Dto }
+  private dir: string
 
-  constructor(schemas: Array<Schema>) {
+  constructor(schemas: Array<Schema>, dir: string) {
     this.schemas = flattenSchemas(schemas)
+    this.dir = dir
   }
 
   getRef(prop: Property) {
@@ -42,6 +53,13 @@ export class DtoGenerator {
         .filter((p) => !ref.properties[p])
         .forEach((key) => {
           ref.properties[key] = prop.properties[key]
+          if (ref.properties[key].ref) {
+            ref.properties[key] = this.getRef(ref.properties[key])
+          }
+
+          if (ref.properties[key].type === 'array') {
+            console.log('111', key, prop.properties[key])
+          }
         })
     }
     return ref
@@ -53,21 +71,22 @@ export class DtoGenerator {
       case 'biginteger':
       case 'decimal':
       case 'double':
-        return '"number"'
+        return 'number'
       case 'string':
       case 'uuid':
       case 'text':
-        return '"string"'
+        return 'string'
       case 'datetime':
-        return '"Date"'
+        return 'Date'
       case 'json':
       case 'blob':
-        return '"any"'
+        return 'any'
       case 'object':
         this.createDto(prop, name)
         return name
       case 'array':
-        return '[]'
+        console.log(name, prop.items[0])
+        return '[' + this.getDefine(prop.items[0], name) + ']'
       case 'map':
         return '{ [key: string]: string }'
       default:
@@ -102,19 +121,36 @@ export class DtoGenerator {
   getDefine(prop: Property, name: string) {
     this.tempName = name
     if (prop.type === 'ref') prop = this.getRef(prop)
-    const type = this.convertType(prop, toCapital(name))
+    const type = this.convertType(prop, name)
     return type
   }
 
-  generate(route: Route): { [key: string]: string } {
+  async writeFile(option: Option) {
+    const { module, controller, functionName } = option
+    const njk = await readFile(join(__dirname, './tpl/dto.njk'), 'utf-8')
+    const content = compile(njk).render({ dtos: this.dtos })
+
+    const path = join(
+      this.dir,
+      module,
+      controller,
+      'dto',
+      getFileName(functionName, 'dto') + '.ts',
+    )
+    await writeFileFix(path, content)
+    eslintFix(path)
+  }
+
+  generate(route: Route, option: Option): { [key: string]: string } {
     // 重置引用
     this.tempRefs = {}
     this.dtos = {}
     const results = {
-      responseDto: this.getDefine(route.responseBody, 'response'),
+      responseDto: this.getDefine(route.responseBody, 'Response'),
     }
-    console.log(JSON.stringify(this.dtos, null, 2))
-    console.log(results)
+
+    this.writeFile(option)
+
     return results
   }
 }

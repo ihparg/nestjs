@@ -36,10 +36,8 @@ export class RouteController {
         process.env.DEV_SCHEMA_PATH || 'data/schemas',
       )
 
-      new ControllerGenerator(routes, schemas).generate(
-        body,
-        DEV_CONTROLLER_PATH,
-      )
+      const cg = new ControllerGenerator(routes, schemas, DEV_CONTROLLER_PATH)
+      cg.generate(body)
     }
 
     return body

@@ -23,11 +23,13 @@ export class ControllerGenerator {
   }
   private imports: { [key: string]: boolean }
   private dtoGenerator: DtoGenerator
+  private dir: string
 
-  constructor(routes: Array<Route>, schemas: Array<Schema>) {
+  constructor(routes: Array<Route>, schemas: Array<Schema>, dir: string) {
     this.routes = routes
     this.services = {}
-    this.dtoGenerator = new DtoGenerator(schemas)
+    this.dtoGenerator = new DtoGenerator(schemas, dir)
+    this.dir = dir
   }
 
   private resolveService(str: string) {
@@ -66,7 +68,7 @@ export class ControllerGenerator {
     return obj
   }
 
-  async generate(route: Route, dir: string) {
+  async generate(route: Route) {
     const { module, controller } = this.splitPath(route)
 
     const routes = []
@@ -74,15 +76,16 @@ export class ControllerGenerator {
     this.routes.forEach((r) => {
       if (r.module !== module || r.path.split('/')[1] !== controller) return
 
+      const sp = this.splitPath(r)
       routes.push({
         desc: r.description,
-        method: toCapital(r.method),
+        method: toCapital(r.method.toLowerCase()),
         responseHeader: this.handleResponseHeader(r.responseHeaders),
         service: this.resolveService(r.resolve),
-        ...this.dtoGenerator.generate(r),
-        ...this.splitPath(r),
+        ...this.dtoGenerator.generate(r, sp),
+        ...sp,
       })
-      this.imports[r.method] = true
+      this.imports[r.method.toLowerCase()] = true
     })
 
     const njk = await readFile(join(__dirname, './tpl/controller.njk'), 'utf-8')
@@ -99,9 +102,9 @@ export class ControllerGenerator {
     const content = compile(njk).render(options)
     const fileName = getFileName(controller, 'controller')
     // 完整路径
-    dir = join(dir, module, controller, fileName + '.ts')
+    const path = join(this.dir, module, controller, fileName + '.ts')
 
-    await writeFileFix(dir, content)
-    eslintFix(dir)
+    await writeFileFix(path, content)
+    eslintFix(path)
   }
 }
