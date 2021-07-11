@@ -7,12 +7,43 @@
     <v-form v-else :key="editable" ref="form" :data="value" :disabled="!editable">
       <div class="form">
         <div style="display: flex;">
+          <template v-if="editable">
+            <div class="api-prefix">{{ apiPrefix }}</div>
+
+            <v-input
+              name="module"
+              label="Module"
+              type="autocomplete"
+              :suggestions="groups"
+              default-value=""
+              style="min-width: 8rem; margin-right: 0.5rem;"
+              help="可选"
+            />
+
+            <div class="api-prefix"></div>
+
+            <v-input
+              name="path"
+              label="路径"
+              required
+              :rules="[rule.required, rule.path, rule.pathExist]"
+              style="flex: 1;"
+              help="格式为 /{controller}/{path:可选}/{method}"
+              default-value=""
+              @input="pathChange"
+            />
+          </template>
+          <div v-else class="full-path">
+            <div class="label">路径</div>
+            <div class="path">{{ fullPath }}</div>
+          </div>
+
           <v-input
-            name="title"
-            label="接口名称"
+            v-if="resolves"
             :rules="[rule.required]"
-            required
-            style="flex: 1; margin-right: 1rem;"
+            :resolves="resolves"
+            name="resolve"
+            type="resolve"
           />
 
           <v-input
@@ -20,35 +51,13 @@
             label="Method"
             required
             type="select"
-            style="width: 10rem; margin-right: 1rem;"
+            style="width: 10rem; margin-left: 1rem;"
             default-value="GET"
             :options="['GET', 'POST', 'PUT', 'DELETE']"
           />
-
-          <v-input
-            name="module"
-            label="Module"
-            type="autocomplete"
-            :suggestions="groups"
-            default-value=""
-            style="width: 15rem;"
-          />
         </div>
 
-        <div style="display: flex;">
-          <v-input
-            name="path"
-            label="路径"
-            required
-            :rules="[rule.required, rule.path, rule.pathExist]"
-            style="flex: 1;"
-            help="格式为 /{controller}/{path:可选}/{method:如果为空，使用method}"
-            :prefix="prefix"
-            @input="pathChange"
-          />
-
-          <v-input v-if="resolves" :resolves="resolves" name="resolve" type="resolve" />
-        </div>
+        <v-input name="title" label="接口描述" :rules="[rule.required]" required />
 
         <v-tabs v-for="(tab, i) in tabs" :key="i" style="margin-bottom: 1rem;">
           <v-tab
@@ -145,7 +154,7 @@ export default {
           if (fullPath in this.existedPath) callback(new Error('路径已存在'))
           else callback(true)
         },
-        path: { regExp: '^/[A-Za-z0-9-_:/]+$', message: '不是一个正确的Url' },
+        path: { regExp: '^[A-Za-z0-9-_:/]+$', message: '不是一个正确的Url' },
       }),
       tabs: [
         {
@@ -188,6 +197,13 @@ export default {
     prefix() {
       const { module } = this.value
       return `${this.apiPrefix ? this.apiPrefix : ''}${module ? `/${module}` : ''}`
+    },
+    fullPath() {
+      const { module, path } = this.value
+      const fullPath = [this.apiPrefix]
+      if (module) fullPath.push(module)
+      fullPath.push(path)
+      return fullPath.join('/')
     },
   },
   watch: {
@@ -278,6 +294,31 @@ export default {
 .form {
   min-height: calc(100vh - 7.5rem);
   padding: 2rem;
+}
+
+.api-prefix {
+  padding-top: 1.8rem;
+  font-size: 0.875rem;
+  margin-right: 4px;
+
+  &::after {
+    content: ' /';
+  }
+}
+
+.full-path {
+  flex: 1;
+  margin-bottom: 1rem;
+
+  .label {
+    color: rgba(0, 0, 0, 0.54);
+  }
+
+  .path {
+    height: 2rem;
+    line-height: 2rem;
+    border-bottom: dotted 2px rgba(0, 0, 0, 0.12);
+  }
 }
 
 .foot {

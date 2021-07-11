@@ -17,7 +17,7 @@
         </div>
 
         <ui-icon
-          v-show="!disabled && valueLength > 0"
+          v-show="!disabled && valueLength > 0 && showClear"
           class="ui-autocomplete__clear-button"
           title="Clear"
           @click="updateValue('')"
@@ -190,6 +190,7 @@ export default {
       default: false,
     },
     required: Boolean,
+    showClear: Boolean,
   },
 
   emits: [

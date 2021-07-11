@@ -1,7 +1,8 @@
 <template>
-  <div ref="container" class="resolve" :class="{ disabled, focused }" @click="open">
-    <div class="label">resolve</div>
+  <div ref="container" class="resolve" :class="classes" @click="open">
+    <div class="label">调用函数</div>
     <div class="value">{{ value }}</div>
+    <div v-if="!!error" class="feedback">{{ error }}</div>
     <div v-if="isRender" class="panel">
       <v-loading v-if="refreshing" />
       <div v-else class="panel-inner">
@@ -33,6 +34,8 @@ export default {
     disabled: Boolean,
     resolves: Object,
     value: String,
+    error: String,
+    invalid: Boolean,
   },
   emits: ['input'],
   data() {
@@ -66,6 +69,13 @@ export default {
     formatValue() {
       const value = [this.graphqlDisabled ? '*' : '', this.func].join('')
       return value
+    },
+    classes() {
+      return {
+        focused: this.focused,
+        disabled: this.disabled,
+        'is-invalid': this.invalid,
+      }
     },
   },
   methods: {
@@ -107,7 +117,7 @@ export default {
 .resolve {
   position: relative;
   margin-left: 1rem;
-  width: 26rem;
+  width: 20rem;
 
   &:hover:not(.disabled) {
     .label {
@@ -140,6 +150,37 @@ export default {
   margin-bottom: 0;
   transform-origin: left;
   transition: color 0.1s ease, transform 0.2s ease;
+
+  &:after {
+    content: '*';
+    margin-left: 0.5rem;
+    color: $md-red-700;
+  }
+}
+
+.disabled .label:after {
+  display: none;
+}
+
+.is-invalid,
+.is-invalid.focused:not(.disabled),
+.is-invalid:hover:not(.disabled) {
+  .feedback,
+  .label {
+    color: $ui-input-label-color--invalid;
+  }
+  .value {
+    border-bottom-color: $ui-input-label-color--invalid;
+  }
+}
+
+.feedback {
+  color: $ui-input-feedback-color;
+  font-size: $ui-input-feedback-font-size;
+  line-height: $ui-input-feedback-line-height;
+  margin: 0;
+  padding-top: $ui-input-feedback-padding-top;
+  position: relative;
 }
 
 .value {
@@ -162,6 +203,7 @@ export default {
 }
 
 .disabled .value {
+  cursor: default;
   border-bottom-style: dotted;
   border-bottom-width: 2px;
 }

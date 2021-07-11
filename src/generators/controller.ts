@@ -4,13 +4,7 @@ import { readFile } from 'fs/promises'
 import { Route, Property, Schema } from '../interface'
 import { resolvePath } from '../resolvable'
 import { DtoGenerator } from './dto'
-import {
-  eslintFix,
-  getFileName,
-  toCapital,
-  writeFileFix,
-  getInstanceName,
-} from './utils'
+import { eslintFix, getFileName, toCapital, writeFileFix, getInstanceName } from './utils'
 
 export class ControllerGenerator {
   private routes: Array<Route>
@@ -74,11 +68,11 @@ export class ControllerGenerator {
     const routes = []
     this.imports = {}
     this.routes.forEach((r) => {
-      if (r.module !== module || r.path.split('/')[1] !== controller) return
+      if (r.module !== module || r.path.split('/')[0] !== controller) return
 
       const sp = this.splitPath(r)
       routes.push({
-        desc: r.description,
+        desc: r.title,
         method: toCapital(r.method.toLowerCase()),
         responseHeader: this.handleResponseHeader(r.responseHeaders),
         service: this.resolveService(r.resolve),
@@ -87,6 +81,8 @@ export class ControllerGenerator {
       })
       this.imports[r.method.toLowerCase()] = true
     })
+
+    console.log(routes)
 
     const njk = await readFile(join(__dirname, './tpl/controller.njk'), 'utf-8')
     const options = {

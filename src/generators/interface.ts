@@ -13,7 +13,7 @@ interface Field {
 }
 
 const getInterfaceName = (name): string => {
-  return 'I' + name[0].toUpperCase() + name.slice(1)
+  return name[0].toUpperCase() + name.slice(1)
 }
 
 const convertType = (props: Property): string => {
@@ -72,10 +72,7 @@ const getFields = (props: Properties): Array<Field> => {
   return fields
 }
 
-export const generateInterface = async (
-  schemas: Array<Schema>,
-  filePath: string,
-) => {
+export const generateInterface = async (schemas: Array<Schema>, filePath: string) => {
   const njk = await readFile(join(__dirname, './tpl/interface.njk'), 'utf-8')
   const tpl = compile(njk)
   const list = schemas.map((schema: Schema) => {
