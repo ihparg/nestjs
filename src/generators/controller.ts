@@ -62,8 +62,8 @@ export class ControllerGenerator {
     return obj
   }
 
-  async generate(route: Route) {
-    const { module, controller } = this.splitPath(route)
+  async generate(src: Route) {
+    const { module, controller } = this.splitPath(src)
 
     const routes = []
     this.imports = {}
@@ -71,18 +71,19 @@ export class ControllerGenerator {
       if (r.module !== module || r.path.split('/')[0] !== controller) return
 
       const sp = this.splitPath(r)
-      routes.push({
+      const route = {
         desc: r.title,
         method: toCapital(r.method.toLowerCase()),
         responseHeader: this.handleResponseHeader(r.responseHeaders),
         service: this.resolveService(r.resolve),
         ...this.dtoGenerator.generate(r, sp),
         ...sp,
-      })
+      }
+      routes.push(route)
       this.imports[r.method.toLowerCase()] = true
+      if (route['BodyDto']) this.imports['Body'] = true
+      if (route['QueryDto']) this.imports['Query'] = true
     })
-
-    console.log(routes)
 
     const njk = await readFile(join(__dirname, './tpl/controller.njk'), 'utf-8')
     const options = {

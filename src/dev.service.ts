@@ -22,7 +22,7 @@ export class DevService {
     return file
   }
 
-  async getJsonFile(path: string): Promise<string> {
+  async getJsonFile(path: string): Promise<any> {
     const text = await readFile(path, 'utf-8')
     return JSON.parse(text)
   }

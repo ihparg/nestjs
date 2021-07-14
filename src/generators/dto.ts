@@ -88,8 +88,7 @@ export class DtoGenerator {
       case 'blob':
         return 'any'
       case 'object':
-        this.createDto(prop, name)
-        return name
+        return this.createDto(prop, name)
       case 'array':
         return '[' + this.getDefine(prop.items[0], name) + ']'
       case 'map':
@@ -105,27 +104,35 @@ export class DtoGenerator {
     Object.keys(props).forEach((name) => {
       let p = props[name]
       if (p.ref) p = this.getRef(p)
+      const type = this.convertType(p, path + toCapital(name))
+      if (!type) return
       fields[name] = {
         required: p.required,
         desc: p.description,
-        type: this.convertType(p, path + toCapital(name)),
+        type,
       }
     })
     return fields
   }
 
   createDto(prop: Property, name: string) {
+    const fields = this.getFields(prop.properties, name)
+    if (!fields) return
+
     this.dtos[name] = {
       desc: prop.description,
       // type: this.convertType(prop, name),
-      fields: this.getFields(prop.properties, name),
+      fields,
     }
+
+    return name
   }
 
   getDefine(prop: Property, name: string, isRoot?: boolean) {
     if (isRoot) this.tempRootName = name
     if (prop.type === 'ref') prop = this.getRef(prop)
     const type = this.convertType(prop, name)
+    console.log(type)
     return type
   }
 
@@ -141,11 +148,24 @@ export class DtoGenerator {
 
   generate(route: Route, option: Option): { [key: string]: string } {
     this.dtos = {}
-    const results = {
-      responseDto: this.getDefine(route.responseBody, toCapital(option.functionName) + 'Response', true),
+    const results: { [key: string]: string } = {}
+
+    const createDto = (prop: Property, name: string) => {
+      if (!prop) return
+      const type = this.getDefine(prop, toCapital(option.functionName) + name, true)
+      if (type) results[name + 'Dto'] = type
     }
 
+    createDto(route.responseBody, 'Response')
+    createDto(route.requestBody, 'Body')
+    createDto(route.queryString, 'Query')
+
     this.writeFile(option)
+
+    const imps = Object.values(results).filter((s) => !['number', 'string', 'Date', 'any'].includes(s))
+    if (imps.length > 0) {
+      results.imports = 'import { ' + imps.join(',') + " } from './dto/" + getFileName(option.functionName, 'dto') + "'"
+    }
 
     return results
   }

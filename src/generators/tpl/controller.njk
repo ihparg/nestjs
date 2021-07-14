@@ -1,6 +1,8 @@
 import { Controller, {{imports}} } from '@nestjs/common'
 {% for name, service in services -%}
 import { {{name}} } from '{{service.import}}'
+{% endfor %}{% for route in routes -%}
+{% if route.imports %}{{route.imports|safe}}{% endif %}
 {% endfor %}
 
 @Controller('{{controllerPath}}')
@@ -12,8 +14,15 @@ export class {{controllerName}}Controller {
   {% for k, v in route.responseHeader %}
   @Header('{{k}}', '{{v}}')
   {% endfor %}
-  async {{route.functionName}}() {
-    await this.{{route.service.name}}.{{route.service.method}}()
+  async {{route.functionName}}(
+  {% if route.BodyDto %}@Body() body: {{route.BodyDto}},{% endif %}
+  {% if route.QueryDto %}@Query() query: {{route.QueryDto}},{% endif %}
+  ){% if route.ResponseDto %}: Promise<{{route.ResponseDto}}>{% endif %} {
+    const result = await this.{{route.service.name}}.{{route.service.method}}(
+    {% if route.BodyDto %}body,{% endif %}
+    {% if route.QueryDto %}query,{% endif %}
+    )
+    return result
   }
   {% endfor %}
 }
