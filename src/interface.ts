@@ -7,6 +7,7 @@ export interface Property {
   exampleValue?: string
   description?: string
   items?: Array<Property>
+  circleRef: string
 }
 
 export interface Properties {

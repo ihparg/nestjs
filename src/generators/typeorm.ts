@@ -12,8 +12,7 @@ interface FieldType {
   refType?: string
 }
 
-const isERModel = (type) =>
-  ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
+const isERModel = (type) => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
 export class TypeOrmGenerator {
   private relatedTypes: { [key: string]: boolean }
@@ -179,9 +178,7 @@ export class TypeOrmGenerator {
     if (refClassName !== this.className) {
       this.relatedEntities[ref] = refClassName
     }
-    const rt = ['ManyToMany', 'ManyToOne', 'OneToMany', 'OneToOne'].find(
-      (s) => refType.indexOf(s) > 0,
-    )
+    const rt = ['ManyToMany', 'ManyToOne', 'OneToMany', 'OneToOne'].find((s) => refType.indexOf(s) > 0)
     if (rt) this.relatedTypes[rt] = true
 
     return {

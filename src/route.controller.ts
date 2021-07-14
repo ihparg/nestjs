@@ -3,6 +3,13 @@ import { DevService } from './dev.service'
 import { ControllerGenerator } from './generators/controller'
 import { Route, DeleteBody } from './interface'
 
+const getFullPath = (route: Route): string => {
+  const path = [route.method]
+  if (route.module) path.push(route.module)
+  path.push(route.path)
+  return path.join('/')
+}
+
 @Controller('dev/route')
 export class RouteController {
   constructor(private readonly devService: DevService) {}
@@ -24,17 +31,20 @@ export class RouteController {
   @Post('/save')
   async saveRoute(@Body() body: Route): Promise<Route> {
     if (!body.id) body.id = this.devService.nextUid()
-    await this.devService.saveFile(
-      this.devService.resolvePath(this.dir, body.id),
-      body,
-    )
+
+    const routes = await this.getList()
+    const fullPath = getFullPath(body)
+    routes.forEach((route) => {
+      if (fullPath === getFullPath(route) && body.id !== route.id) {
+        throw new Error('路径已经存在')
+      }
+    })
+
+    await this.devService.saveFile(this.devService.resolvePath(this.dir, body.id), body)
 
     const { DEV_CONTROLLER_PATH } = process.env
     if (DEV_CONTROLLER_PATH) {
-      const routes = await this.getList()
-      const schemas = await this.devService.getJsonFileList(
-        process.env.DEV_SCHEMA_PATH || 'data/schemas',
-      )
+      const schemas = await this.devService.getJsonFileList(process.env.DEV_SCHEMA_PATH || 'data/schemas')
 
       const cg = new ControllerGenerator(routes, schemas, DEV_CONTROLLER_PATH)
       cg.generate(body)
@@ -45,8 +55,6 @@ export class RouteController {
 
   @Delete('/')
   async deleteRoute(@Body() body: DeleteBody) {
-    await this.devService.deleteFile(
-      this.devService.resolvePath(this.dir, body.id),
-    )
+    await this.devService.deleteFile(this.devService.resolvePath(this.dir, body.id))
   }
 }

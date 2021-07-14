@@ -5,8 +5,7 @@ import { Schema, DeleteBody } from './interface'
 import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
 
-const isERModel = (type) =>
-  ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
+const isERModel = (type) => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
 @Controller('dev/schema')
 export class SchemaController {
@@ -25,10 +24,7 @@ export class SchemaController {
   @Post('/save')
   async saveSchema(@Body() body: Schema): Promise<Schema> {
     if (!body.id) body.id = this.devService.nextUid()
-    await this.devService.saveFile(
-      this.devService.resolvePath(this.dir, body.id),
-      body,
-    )
+    await this.devService.saveFile(this.devService.resolvePath(this.dir, body.id), body)
 
     const { DEV_INTERFACE_PATH, DEV_TYPEORM_ENTITY_PATH } = process.env
 
@@ -46,9 +42,7 @@ export class SchemaController {
 
   @Delete('/')
   async deleteRoute(@Body() body: DeleteBody) {
-    await this.devService.deleteFile(
-      this.devService.resolvePath(this.dir, body.id),
-    )
+    await this.devService.deleteFile(this.devService.resolvePath(this.dir, body.id))
 
     const { DEV_INTERFACE_PATH } = process.env
     const schemas = await this.getList()

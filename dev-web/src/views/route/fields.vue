@@ -7,6 +7,7 @@
       :active="handleClick"
       :schemas="schemas"
       :ref-change="handleRefChange"
+      :ref-path="{}"
       name=""
       path=""
     />

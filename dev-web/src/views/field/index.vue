@@ -33,8 +33,10 @@
       <span v-if="value.ref && value.ref.indexOf('.') < 0" class="ref-name">
         &lt;{{ value.ref }}&gt;
       </span>
-      <span :class="value.type">{{ text }}</span>
-      <span v-if="comma && path && realValue.type !== 'array' && !isExpandable">
+      <span :class="[value.type, realValue.circleRef && 'circle']">{{ text }}</span>
+      <span
+        v-if="comma && path && (realValue.type !== 'array' || realValue.circleRef) && !isExpandable"
+      >
         ,
       </span>
       <span v-if="lockRef && value.index" class="index">&lt;Index&gt;</span>
@@ -55,6 +57,7 @@
           :show-comments="showComments"
           :lock-ref="lockRef"
           :ref-change="refChange"
+          :ref-path="nextRefPath"
           :is-item="
             (realValue.type === 'array' || realValue.type === 'map') && value.type === 'ref'
           "
@@ -73,7 +76,9 @@
       </div>
     </div>
     <div v-if="isExpandable">}<span v-if="!isRoot">,</span></div>
-    <div v-if="realValue.type === 'array'">]<span v-if="!isRoot">,</span></div>
+    <div v-if="realValue.type === 'array' && !realValue.circleRef">
+      ]<span v-if="!isRoot">,</span>
+    </div>
   </div>
 </template>
 
@@ -98,6 +103,7 @@ export default {
     name: String,
     path: String,
     refChange: Function,
+    refPath: Object,
     schemas: Object,
     showComments: Boolean,
     value: { type: Object, default: () => ({ type: 'object', properties: {} }) },
@@ -121,10 +127,18 @@ export default {
     isRoot() {
       return this.name === '' && this.path === ''
     },
+    nextRefPath() {
+      const refs = { ...this.refPath }
+      if (this.value.$ref) refs[this.value.$ref] = this.path
+      return refs
+    },
     text() {
       const props = this.realValue
       const example = props.exampleValue ? mock(props.exampleValue) : null
       const value = example || props.defaultValue
+
+      if (props.circleRef) return `<${props.circleRef}>`
+
       switch (props.type) {
         case 'array':
           return '['
@@ -157,6 +171,7 @@ export default {
     children() {
       const { properties = {}, type, items } = this.value
       let { ref } = this.value
+      if (this.realValue.circleRef) return []
       if (type === 'object') return sortByKey(properties)
 
       const refField = this.flattenedSchemas[ref]
@@ -228,6 +243,7 @@ export default {
     },
     isExpandable() {
       const { type } = this.lockRef ? this.value : this.realValue
+      if (this.realValue.circleRef) return false
       if (this.lockRef && type === 'ref') return false
       if (type === 'object' || type === 'map') return true
       if (type !== 'ref') return false
@@ -258,7 +274,11 @@ export default {
         if (field.type === 'object' || field.type === 'ref') {
           newValue.properties = {}
         }
-        if (field.type === 'ref') {
+
+        if (this.refPath[this.value.$ref]) {
+          // circle ref
+          newValue.circleRef = this.refPath[this.value.$ref]
+        } else if (field.type === 'ref') {
           const schema = this.flattenedSchemas[field.ref].properties
           if (schema) {
             Object.keys(schema).forEach(f => {
@@ -271,16 +291,6 @@ export default {
         } else if (field.properties) {
           newValue.ref = this.value.$ref
           newValue.type = 'ref'
-          /*
-          Object.keys(field.properties).forEach(k => {
-            if (!['ref', 'object'].includes(field.properties[k].type)) {
-              newValue.properties[k] = {
-                required: field.properties[k].required,
-                ref: `${newValue.ref}`,
-              }
-            }
-          })
-          */
         }
       }
       this.refChange(this.path, newValue)
@@ -318,6 +328,10 @@ export default {
 
 .boolean {
   color: #a32eff;
+}
+
+.circle {
+  color: #486491;
 }
 
 .node {

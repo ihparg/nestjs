@@ -8,12 +8,7 @@ import { ResolveController } from './resolve.controller'
 
 @Module({
   imports: [ConfigModule.forRoot()],
-  controllers: [
-    DevController,
-    RouteController,
-    SchemaController,
-    ResolveController,
-  ],
+  controllers: [DevController, RouteController, SchemaController, ResolveController],
   providers: [DevService],
 })
 export class DevModule {}

@@ -62,7 +62,7 @@ export const getFlattenedProps = (value, schemas) => {
     if (props.type === 'ref') props = getFlattenedProps(props, schemas)
   }
   props = { ...props }
-  ;['required', 'defaultValue', 'exampleValue', 'description'].forEach(k => {
+  ;['required', 'defaultValue', 'exampleValue', 'description', 'circleRef'].forEach(k => {
     if (value[k] != null && value[k] !== '') props[k] = value[k]
   })
 
