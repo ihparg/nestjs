@@ -16,13 +16,13 @@ export class ControllerGenerator {
     }
   }
   private imports: { [key: string]: boolean }
-  private dtoGenerator: DtoGenerator
+  private dtoGenerator: { (): DtoGenerator }
   private dir: string
 
   constructor(routes: Array<Route>, schemas: Array<Schema>, dir: string) {
     this.routes = routes
     this.services = {}
-    this.dtoGenerator = new DtoGenerator(schemas, dir)
+    this.dtoGenerator = () => new DtoGenerator(schemas, dir)
     this.dir = dir
   }
 
@@ -41,11 +41,18 @@ export class ControllerGenerator {
 
   private splitPath({ path, method, module }) {
     const splitedPath = path.replace(/^\/|\/$/g, '').split('/')
+
+    const fn = (sp: [string], param: string) => {
+      const name = `${sp.pop() ?? ''}${param}`
+      if (name && name.indexOf(':') >= 0) return fn(sp, 'By' + toCapital(name.replace(/:/g, '')))
+      return method.toLowerCase() + toCapital(name)
+    }
+
     return {
       module,
       controller: splitedPath.shift(),
       pathname: '/' + splitedPath.join('/'),
-      functionName: splitedPath.pop() || method?.toLowerCase(),
+      functionName: fn(splitedPath, ''),
     }
   }
 
@@ -67,7 +74,7 @@ export class ControllerGenerator {
 
     const routes = []
     this.imports = {}
-    this.routes.forEach((r) => {
+    this.routes.forEach(async (r) => {
       if (r.module !== module || r.path.split('/')[0] !== controller) return
 
       const sp = this.splitPath(r)
@@ -76,7 +83,7 @@ export class ControllerGenerator {
         method: toCapital(r.method.toLowerCase()),
         responseHeader: this.handleResponseHeader(r.responseHeaders),
         service: this.resolveService(r.resolve),
-        ...this.dtoGenerator.generate(r, sp),
+        ...this.dtoGenerator().generate(r, sp),
         ...sp,
       }
       routes.push(route)
