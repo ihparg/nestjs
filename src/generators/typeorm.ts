@@ -51,11 +51,7 @@ export class TypeOrmGenerator {
     }
     const tpl = compile(njk)
     const content = tpl.render(options)
-    const path =
-      compile(this.path).render({
-        tag: this.schema.tag,
-        name: getFileName(this.name, 'entity'),
-      }) + '.ts'
+    const path = join(this.path, getFileName(this.name, 'entity') + '.ts')
     await writeFileFix(path, content)
     eslintFix(path)
   }
@@ -63,8 +59,7 @@ export class TypeOrmGenerator {
   getImports() {
     const imports = []
     Object.keys(this.relatedEntities).forEach((k) => {
-      const pkg = compile(this.path).render({ ...this.schema, name: k })
-      const file = getFileName(pkg.slice(pkg.lastIndexOf('/') + 1), 'entity')
+      const file = getFileName(k, 'entity')
       imports.push(`import { ${this.relatedEntities[k]} } from './${file}'`)
     })
     return imports
