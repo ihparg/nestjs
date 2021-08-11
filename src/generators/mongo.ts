@@ -3,7 +3,7 @@ import { join } from 'path'
 import { compile } from 'nunjucks'
 import { Schema, Properties, Property } from '../interface'
 import { getField as getFieldInterface } from './interface'
-import { toCapital } from './utils'
+import { toCapital, getFileName, writeFileFix, eslintFix } from './utils'
 
 interface FieldType {
   sqlType: any
@@ -27,7 +27,7 @@ export class MongoGenerator {
   }
 
   async generate() {
-    const njk = await readFile(join(__dirname, './tpl/typeorm.njk'), 'utf-8')
+    const njk = await readFile(join(__dirname, './tpl/mongo.njk'), 'utf-8')
     const props = this.schema.content.properties
     const options = {
       name: this.className,
@@ -35,14 +35,15 @@ export class MongoGenerator {
     }
     const tpl = compile(njk)
     const content = tpl.render(options)
-    console.log(content)
+    const path = join(this.path, getFileName(this.name, 'schema') + '.ts')
+    await writeFileFix(path, content)
+    eslintFix(path)
   }
 
   getFields(props: Properties) {
     const fields = []
     Object.keys(props).forEach((name) => {
       const p = props[name]
-      if (name === 'id') return
       fields.push(this.getField(p, name))
     })
     fields.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
@@ -52,8 +53,6 @@ export class MongoGenerator {
   private getField(prop: Property, name: string) {
     if (prop.type === 'ref') {
       return this.getRef(prop, name, false)
-    } else if (prop.type === 'array' && prop.items[0].type === 'ref') {
-      return this.getRef(prop.items[0], name, true)
     } else {
       return {
         ...getFieldInterface(prop, name),
@@ -67,6 +66,16 @@ export class MongoGenerator {
     const refClassName = toCapital(ref)
     const target = this.schemas.find((s) => s.name === ref)
     if (!target) throw new Error(`Schema "${ref}" is missing.`)
+
+    // 如果关联的没有标记为数据表，直接返回类型
+    if (target.tag !== 'mongodb') {
+      return {
+        ...getFieldInterface(target.content, name),
+        ...this.getType(target.content),
+      }
+    }
+
+    return {}
   }
 
   private getType(prop: Property) {
@@ -101,9 +110,11 @@ export class MongoGenerator {
         type = { jsType: 'any', sqlType: 'json' }
         break
       default:
-        type = { jsType: prop.type, sqlType: { type: prop.type } }
+        type = { jsType: prop.type, sqlType: {}
     }
-    type.sqlType = JSON.stringify(type.sqlType)
+    if (typeof type.sqlType !== 'string') {
+      type.sqlType = JSON.stringify(type.sqlType)
+    }
     return type
   }
 }

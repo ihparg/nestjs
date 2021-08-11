@@ -4,6 +4,7 @@ import { DevService } from './dev.service'
 import { Schema, DeleteBody } from './interface'
 import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
+import { MongoGenerator } from './generators/mongo'
 
 const isERModel = (type) => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
@@ -26,7 +27,7 @@ export class SchemaController {
     if (!body.id) body.id = this.devService.nextUid()
     await this.devService.saveFile(this.devService.resolvePath(this.dir, body.id), body)
 
-    const { DEV_INTERFACE_PATH, DEV_TYPEORM_ENTITY_PATH } = process.env
+    const { DEV_INTERFACE_PATH, DEV_TYPEORM_ENTITY_PATH, DEV_MONGODB_SCHEMA_PATH } = process.env
 
     const schemas = await this.getList()
     if (DEV_INTERFACE_PATH) {
@@ -35,6 +36,8 @@ export class SchemaController {
 
     if (DEV_TYPEORM_ENTITY_PATH && isERModel(body.tag)) {
       new TypeOrmGenerator(body, DEV_TYPEORM_ENTITY_PATH, schemas).generate()
+    } else if (DEV_MONGODB_SCHEMA_PATH && body.tag === 'mongodb') {
+      new MongoGenerator(body, DEV_MONGODB_SCHEMA_PATH, schemas).generate()
     }
 
     return body

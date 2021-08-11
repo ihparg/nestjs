@@ -1,0 +1,17 @@
+{% macro createField(field) %}
+@Prop({{field.sqlType|safe}})
+{{field.name}}: {{field.jsType}}
+{% endmacro %}
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongose'
+import * as mongoose from 'mongose'
+
+export type {{name}}Document = {{name}} & mongoose.Document
+
+@Schema()
+export class {{name}} {
+{% for field in fields %}
+{{createField(field)}}
+{% endfor %}
+}
+
+export const {{name}}Schema = SchemaFactory.createForClass({{name}})
