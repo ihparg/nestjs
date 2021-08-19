@@ -1,9 +1,13 @@
 {% macro createField(field) %}
-@Prop({{field.sqlType|safe}})
-{{field.name}}: {{field.jsType}}
+  {%- if (field.desc) %}/** {{field.desc}} */{% endif %}
+  @Prop({{field.sqlType|safe}})
+  {{field.name}}{%if not(field.required)%}?{% endif %}: {{field.jsType|safe}}
 {% endmacro %}
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongose'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongose'
 import * as mongoose from 'mongose'
+{% for imp in imports -%}
+{{imp|safe}}
+{% endfor %}
 
 export type {{name}}Document = {{name}} & mongoose.Document
 

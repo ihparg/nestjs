@@ -10,6 +10,21 @@ interface FieldType {
   jsType: string
 }
 
+const interfaceTpl = compile(`{% macro createObject(fields) %} {
+  {% for field in fields %}{{createField(field)}}{% endfor %}
+}{% endmacro %}
+{% macro createField(field) %}
+  {% if (field.name) %}{{field.name}}{%if not(field.required)%}?{% endif %}: {% endif %}
+  {%- if (field.type === 'object' or field.type === 'map') -%}
+    {{createObject(field.fields)}},
+  {%- elif (field.type === 'array') -%}
+    [{{createField(field.fields[0])}}],
+  {%- else -%}
+    {{ field.type | capitalize }},
+  {%- endif %}
+{% endmacro %}
+{{createObject(fields)}}`)
+
 export class MongoGenerator {
   private schema: Schema
   private schemas: Array<Schema>
@@ -24,6 +39,7 @@ export class MongoGenerator {
     this.path = path
     this.className = toCapital(schema.name)
     this.schema = schema
+    this.relatedModels = {}
   }
 
   async generate() {
@@ -32,12 +48,22 @@ export class MongoGenerator {
     const options = {
       name: this.className,
       fields: this.getFields(props),
+      imports: this.getImports(),
     }
     const tpl = compile(njk)
     const content = tpl.render(options)
     const path = join(this.path, getFileName(this.name, 'schema') + '.ts')
     await writeFileFix(path, content)
     eslintFix(path)
+  }
+
+  getImports() {
+    const imports = []
+    Object.keys(this.relatedModels).forEach((k) => {
+      const file = getFileName(k, 'schema')
+      imports.push(`import { ${this.relatedModels[k]} } from './${file}'`)
+    })
+    return imports
   }
 
   getFields(props: Properties) {
@@ -51,17 +77,13 @@ export class MongoGenerator {
   }
 
   private getField(prop: Property, name: string) {
-    if (prop.type === 'ref') {
-      return this.getRef(prop, name, false)
-    } else {
-      return {
-        ...getFieldInterface(prop, name),
-        ...this.getType(prop),
-      }
+    return {
+      ...getFieldInterface(prop, name),
+      ...this.getType(prop),
     }
   }
 
-  getRef(prop: Property, name: string, isMany: boolean) {
+  getRef(prop: Property, name: string): any {
     const { ref } = prop
     const refClassName = toCapital(ref)
     const target = this.schemas.find((s) => s.name === ref)
@@ -75,42 +97,55 @@ export class MongoGenerator {
       }
     }
 
-    return {}
+    if (refClassName !== this.className) {
+      this.relatedModels[ref] = refClassName
+    }
+
+    return { jsType: refClassName }
   }
 
-  private getType(prop: Property) {
-    if (!prop) return undefined
+  private getType(prop: Property): FieldType {
+    if (!prop) return { jsType: '', sqlType: {} }
     let type: FieldType
     switch (prop.type) {
       case 'uuid':
         type = { jsType: 'string', sqlType: '{ type: mongoose.Schema.Types.ObjectId }' }
         break
       case 'integer':
-        type = { jsType: 'number', sqlType: {} }
+        type = { jsType: 'number', sqlType: { required: prop.required } }
         break
       // 不建议使用double和float，使用decimal类型
       case 'double':
       case 'float':
       case 'decimal':
       case 'biginteger':
-        type = { jsType: 'number', sqlType: {} }
+        type = { jsType: 'number', sqlType: { required: prop.required } }
         break
       case 'text':
-        type = { jsType: 'string', sqlType: {} }
+        type = { jsType: 'string', sqlType: { required: prop.required } }
         break
       case 'object':
       case 'map':
-        type = { jsType: 'Record<string, any>', sqlType: getFieldInterface(prop) }
+        const fields = getFieldInterface(prop).fields
+        console.log(fields)
+        type = { jsType: 'Record<string, any>', sqlType: `raw(${interfaceTpl.render({ fields })})` }
         break
       case 'array':
         const itemType = this.getType(prop.items[0])
-        type = { jsType: itemType.jsType + '[]', sqlType: { type: [itemType.jsType] } }
+        type = { jsType: itemType.jsType + '[]', sqlType: `{ type: [${itemType.sqlType}] }` }
         break
       case 'json':
-        type = { jsType: 'any', sqlType: 'json' }
+        type = { jsType: 'any', sqlType: {} }
+        break
+      case 'datetime':
+        type = { jsType: 'Date', sqlType: `{ type: Date }` }
+        break
+      case 'ref':
+        const ref = this.getRef(prop, '')
+        type = { jsType: ref.jsType, sqlType: `{ type: mongoose.Schema.Types.ObjectId, ref: '${ref.jsType}' }` }
         break
       default:
-        type = { jsType: prop.type, sqlType: {}
+        type = { jsType: prop.type, sqlType: { required: prop.required } }
     }
     if (typeof type.sqlType !== 'string') {
       type.sqlType = JSON.stringify(type.sqlType)
