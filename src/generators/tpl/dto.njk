@@ -3,7 +3,7 @@
 export class {{name}} {
   {% for field, prop in dto.fields %}
   {% if prop.desc %}/** {{prop.desc}} */{% endif %}
-  {{field}}: {{prop.type|safe}}
+  {{field}}{%if not(prop.required)%}?{% endif %}: {{prop.type|safe}}
   {% endfor %}
 }
 {% endfor %}

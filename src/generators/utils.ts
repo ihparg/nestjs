@@ -1,21 +1,36 @@
-import { writeFile } from 'fs/promises'
+import { writeFile, rename } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
+import { promisify } from 'util'
 import { exec } from 'child_process'
 import { dirname } from 'path'
+import { customAlphabet } from 'nanoid'
+
+const promisedExec = promisify(exec)
+
+export const nextUid = customAlphabet('1234567890abcdef', 10)
 
 export const mkdirIfNotExist = (path: string) => {
   const dir = dirname(path)
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
 }
 
-export const writeFileFix = async (path: string, content: string) => {
+let fileCache = []
+
+export const writeFileDelay = async (path: string, content: string) => {
   mkdirIfNotExist(path)
-  await writeFile(path, content)
+
+  const temp = path + '.tmp.ts'
+  await writeFile(temp, content)
+  fileCache.push([temp, path])
 }
 
-export const eslintFix = (path) => {
-  const cmd = `npx eslint ${path} --fix`
-  exec(cmd)
+export const writeFileFix = async () => {
+  const temp = [...fileCache]
+  fileCache = []
+
+  await Promise.all(temp.map(([file]) => promisedExec(`npx eslint ${file} --fix`)))
+
+  Promise.all(temp.map(([oldFile, newFile]) => rename(oldFile, newFile))).then()
 }
 
 export const toCamelCase = (str: string): string => {

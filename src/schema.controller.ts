@@ -5,6 +5,7 @@ import { Schema, DeleteBody } from './interface'
 import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
 import { MongoGenerator } from './generators/mongo'
+import { writeFileFix } from './generators/utils'
 
 const isERModel = (type) => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
@@ -35,10 +36,13 @@ export class SchemaController {
     }
 
     if (DEV_TYPEORM_ENTITY_PATH && isERModel(body.tag)) {
-      new TypeOrmGenerator(body, DEV_TYPEORM_ENTITY_PATH, schemas).generate()
+      await new TypeOrmGenerator(body, DEV_TYPEORM_ENTITY_PATH, schemas).generate()
     } else if (DEV_MONGODB_SCHEMA_PATH && body.tag === 'mongodb') {
-      new MongoGenerator(body, DEV_MONGODB_SCHEMA_PATH, schemas).generate()
+      await new MongoGenerator(body, DEV_MONGODB_SCHEMA_PATH, schemas).generate()
     }
+
+    console.log('save')
+    writeFileFix()
 
     return body
   }

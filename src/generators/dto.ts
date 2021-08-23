@@ -3,7 +3,7 @@ import { readFile } from 'fs/promises'
 import { compile } from 'nunjucks'
 import { Properties, Property, Route, Schema } from '../interface'
 import { flattenSchemas } from './schema'
-import { eslintFix, getFileName, toCapital, writeFileFix } from './utils'
+import { getFileName, toCapital, writeFileDelay } from './utils'
 
 interface Field {
   type: string
@@ -64,7 +64,7 @@ export class DtoGenerator {
         .map((s) => toCapital(s))
         .join('')
 
-    return prop.type === 'array' ? '[' + name + ']' : name
+    return prop.type === 'array' ? name + '[]' : name
   }
 
   convertType(prop: Property, name: string) {
@@ -90,7 +90,7 @@ export class DtoGenerator {
       case 'object':
         return this.createDto(prop, name)
       case 'array':
-        return '[' + this.getDefine(prop.items[0], name) + ']'
+        return this.getDefine(prop.items[0], name) + '[]'
       case 'map':
         return '{ [key: string]: string }'
       default:
@@ -132,7 +132,6 @@ export class DtoGenerator {
     if (isRoot) this.tempRootName = name
     if (prop.type === 'ref') prop = this.getRef(prop)
     const type = this.convertType(prop, name)
-    console.log(type)
     return type
   }
 
@@ -142,8 +141,7 @@ export class DtoGenerator {
     const content = compile(njk).render({ dtos: this.dtos })
 
     const path = join(this.dir, module, controller, 'dto', getFileName(functionName, 'dto') + '.ts')
-    await writeFileFix(path, content)
-    eslintFix(path)
+    await writeFileDelay(path, content)
   }
 
   generate(route: Route, option: Option): { [key: string]: string } {

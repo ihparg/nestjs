@@ -3,8 +3,8 @@
   @Prop({{field.sqlType|safe}})
   {{field.name}}{%if not(field.required)%}?{% endif %}: {{field.jsType|safe}}
 {% endmacro %}
-import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongose'
-import * as mongoose from 'mongose'
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
+import * as mongoose from 'mongoose'
 {% for imp in imports -%}
 {{imp|safe}}
 {% endfor %}

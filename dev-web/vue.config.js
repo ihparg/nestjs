@@ -5,7 +5,7 @@ module.exports = {
     port: 3001,
     proxy: {
       '^/dev': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3009',
         ws: true,
         changeOrigin: true,
       },

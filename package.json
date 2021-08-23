@@ -10,7 +10,7 @@
     "dev:web": "cd dev-web && yarn dev",
     "dev:server": "nest start --watch",
     "build:web": "cd dev-web && yarn && yarn build",
-    "build": "nest build",
+    "build": "nest build && yarn build:web",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:debug": "nest start --debug --watch",
@@ -20,8 +20,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "copy:tpl": "cpx 'src/generators/tpl/**/*' 'dist/generators/tpl' --watch"
+    "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^7.6.15",
@@ -49,7 +48,6 @@
     "@types/supertest": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
-    "cpx": "^1.5.0",
     "eslint": "^7.22.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^3.3.1",

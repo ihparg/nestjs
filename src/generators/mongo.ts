@@ -3,7 +3,7 @@ import { join } from 'path'
 import { compile } from 'nunjucks'
 import { Schema, Properties, Property } from '../interface'
 import { getField as getFieldInterface } from './interface'
-import { toCapital, getFileName, writeFileFix, eslintFix } from './utils'
+import { toCapital, getFileName, writeFileDelay } from './utils'
 
 interface FieldType {
   sqlType: any
@@ -53,8 +53,7 @@ export class MongoGenerator {
     const tpl = compile(njk)
     const content = tpl.render(options)
     const path = join(this.path, getFileName(this.name, 'schema') + '.ts')
-    await writeFileFix(path, content)
-    eslintFix(path)
+    await writeFileDelay(path, content)
   }
 
   getImports() {

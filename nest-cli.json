@@ -2,8 +2,7 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": [
-      "tpl/**/*"
-    ]
+    "assets": ["**/*.njk"],
+    "watchAssets": true
   }
 }

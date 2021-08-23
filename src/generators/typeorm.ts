@@ -3,7 +3,7 @@ import { join } from 'path'
 import { compile } from 'nunjucks'
 import { Properties, Property, Schema } from '../interface'
 import { getField as getFieldInterface } from './interface'
-import { eslintFix, writeFileFix, getFileName } from './utils'
+import { writeFileDelay, getFileName } from './utils'
 
 interface FieldType {
   sqlType: any
@@ -52,8 +52,7 @@ export class TypeOrmGenerator {
     const tpl = compile(njk)
     const content = tpl.render(options)
     const path = join(this.path, getFileName(this.name, 'entity') + '.ts')
-    await writeFileFix(path, content)
-    eslintFix(path)
+    await writeFileDelay(path, content)
   }
 
   getImports() {
