@@ -29,8 +29,7 @@ export const writeFileFix = async () => {
   fileCache = []
 
   await Promise.all(temp.map(([file]) => promisedExec(`npx eslint ${file} --fix`)))
-
-  Promise.all(temp.map(([oldFile, newFile]) => rename(oldFile, newFile))).then()
+  await Promise.all(temp.map(([oldFile, newFile]) => rename(oldFile, newFile)))
 }
 
 export const toCamelCase = (str: string): string => {

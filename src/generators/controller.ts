@@ -96,7 +96,7 @@ export class ControllerGenerator {
     const options = {
       routes,
       services: this.services,
-      controllerPath: '/' + (module ? module + '/' : '') + controller,
+      controllerPath: (process.env.API_PREFIX || '') + '/' + (module ? module + '/' : '') + controller,
       controllerName: toCapital(controller),
       imports: Object.keys(this.imports)
         .map((m) => toCapital(m))

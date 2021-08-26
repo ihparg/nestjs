@@ -41,8 +41,7 @@ export class SchemaController {
       await new MongoGenerator(body, DEV_MONGODB_SCHEMA_PATH, schemas).generate()
     }
 
-    console.log('save')
-    writeFileFix()
+    await writeFileFix()
 
     return body
   }

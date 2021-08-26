@@ -48,10 +48,8 @@ export class RouteController {
       const schemas = await this.devService.getJsonFileList(process.env.DEV_SCHEMA_PATH || 'data/schemas')
 
       const cg = new ControllerGenerator(routes, schemas, DEV_CONTROLLER_PATH)
-      Promise.resolve().then(async () => {
-        await cg.generate(body)
-        writeFileFix()
-      })
+      await cg.generate(body)
+      await writeFileFix()
     }
 
     return body

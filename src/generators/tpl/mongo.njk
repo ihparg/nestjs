@@ -1,6 +1,6 @@
 {% macro createField(field) %}
   {%- if (field.desc) %}/** {{field.desc}} */{% endif %}
-  @Prop({{field.sqlType|safe}})
+  {% if field.name !== '_id' %}@Prop({{field.sqlType|safe}}){% endif %}
   {{field.name}}{%if not(field.required)%}?{% endif %}: {{field.jsType|safe}}
 {% endmacro %}
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose'
@@ -9,13 +9,13 @@ import * as mongoose from 'mongoose'
 {{imp|safe}}
 {% endfor %}
 
-export type {{name}}Document = {{name}} & mongoose.Document
-
 @Schema()
 export class {{name}} {
 {% for field in fields %}
 {{createField(field)}}
 {% endfor %}
 }
+
+export type {{name}}Document = {{name}} & mongoose.Document
 
 export const {{name}}Schema = SchemaFactory.createForClass({{name}})
