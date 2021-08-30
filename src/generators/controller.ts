@@ -4,7 +4,7 @@ import { readFile } from 'fs/promises'
 import { Route, Property, Schema } from '../interface'
 import { resolvePath } from '../resolvable'
 import { DtoGenerator } from './dto'
-import { getFileName, toCapital, writeFileDelay, getInstanceName } from './utils'
+import { getFileName, toCapital, writeFileFix, getInstanceName } from './utils'
 
 export class ControllerGenerator {
   private routes: Array<Route>
@@ -108,6 +108,6 @@ export class ControllerGenerator {
     // 完整路径
     const path = join(this.dir, module, controller, fileName + '.ts')
 
-    await writeFileDelay(path, content)
+    await writeFileFix(path, content)
   }
 }

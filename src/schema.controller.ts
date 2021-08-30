@@ -5,7 +5,6 @@ import { Schema, DeleteBody } from './interface'
 import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
 import { MongoGenerator } from './generators/mongo'
-import { writeFileFix } from './generators/utils'
 
 const isERModel = (type) => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
@@ -40,8 +39,6 @@ export class SchemaController {
     } else if (DEV_MONGODB_SCHEMA_PATH && body.tag === 'mongodb') {
       await new MongoGenerator(body, DEV_MONGODB_SCHEMA_PATH, schemas).generate()
     }
-
-    await writeFileFix()
 
     return body
   }

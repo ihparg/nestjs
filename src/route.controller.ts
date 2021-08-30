@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Post } from '@nestjs/common'
 import { DevService } from './dev.service'
 import { ControllerGenerator } from './generators/controller'
-import { writeFileFix } from './generators/utils'
 import { Route, DeleteBody } from './interface'
 
 const getFullPath = (route: Route): string => {
@@ -49,7 +48,6 @@ export class RouteController {
 
       const cg = new ControllerGenerator(routes, schemas, DEV_CONTROLLER_PATH)
       await cg.generate(body)
-      await writeFileFix()
     }
 
     return body

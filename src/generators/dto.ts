@@ -3,7 +3,7 @@ import { readFile } from 'fs/promises'
 import { compile } from 'nunjucks'
 import { Properties, Property, Route, Schema } from '../interface'
 import { flattenSchemas } from './schema'
-import { getFileName, toCapital, writeFileDelay } from './utils'
+import { getFileName, toCapital, writeFileFix } from './utils'
 
 interface Field {
   type: string
@@ -141,7 +141,7 @@ export class DtoGenerator {
     const content = compile(njk).render({ dtos: this.dtos })
 
     const path = join(this.dir, module, controller, 'dto', getFileName(functionName, 'dto') + '.ts')
-    await writeFileDelay(path, content)
+    await writeFileFix(path, content)
   }
 
   generate(route: Route, option: Option): { [key: string]: string } {

@@ -2,7 +2,7 @@ import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { compile } from 'nunjucks'
 import { Schema, Properties, Property } from '../interface'
-import { writeFileDelay } from './utils'
+import { writeFileFix } from './utils'
 
 interface Field {
   name: string
@@ -84,5 +84,5 @@ export const generateInterface = async (schemas: Array<Schema>, filePath: string
     }
   })
   const content = tpl.render({ schemas: list })
-  await writeFileDelay(filePath, content)
+  await writeFileFix(filePath, content)
 }
