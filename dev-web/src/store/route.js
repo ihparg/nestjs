@@ -1,5 +1,4 @@
 import fetch from '@/utils/fetch'
-import message from '@/components/message'
 
 const mutations = {
   CHANGE_STATUS(state, { id, status }) {
@@ -29,16 +28,7 @@ const actions = {
   async fetchList({ state }) {
     if (state.data) return
     const data = await fetch.get('/dev/route')
-
-    let resolves = null
-    try {
-      resolves = await fetch.get('/dev/resolve/list')
-    } catch (e) {
-      message.show('resolve 获取失败', 'error')
-    }
-
     state.data = data
-    state.resolves = resolves
   },
 
   async save({ state }, { data, success }) {

@@ -39,11 +39,12 @@
           </div>
 
           <v-input
-            v-if="resolves"
+            label="Service"
             :rules="[rule.required]"
-            :resolves="resolves"
+            :suggestions="resolves"
             name="resolve"
-            type="resolve"
+            type="autocomplete"
+            style="width: 20rem; margin-left: 1rem;"
           />
 
           <v-input
@@ -110,7 +111,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 import Rule from '@/utils/rule'
 import { getRouteParamsKeys, getAllRefs } from '@/utils/route'
 import { fastClone } from '@/utils/clone'
@@ -118,11 +119,9 @@ import fetch from '@/utils/fetch'
 import { registerInput } from '@/components/form'
 import Fields from './fields.vue'
 import Params from './params.vue'
-import Rosolve from './resolve.vue'
 
 registerInput('route-fields', Fields)
 registerInput('route-params', Params)
-registerInput('resolve', Rosolve)
 
 export default {
   props: {
@@ -172,7 +171,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('route', ['resolves']),
+    // ...mapState('route', ['resolves']),
     ...mapGetters('schema', ['flattenedSchemas']),
     propertiesLength() {
       const length = {}
@@ -213,6 +212,11 @@ export default {
     routes() {
       this.value = this.cloneRoute()
     },
+  },
+  created() {
+    fetch.get(`/dev/resolve/list?force=true`).then(res => {
+      this.resolves = res
+    })
   },
   methods: {
     checkRefs() {

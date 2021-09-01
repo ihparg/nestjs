@@ -5,6 +5,7 @@ import { Route, Property, Schema } from '../interface'
 import { resolvePath } from '../resolvable'
 import { DtoGenerator } from './dto'
 import { getFileName, toCapital, writeFileFix, getInstanceName } from './utils'
+import { resolveService } from './service'
 
 export class ControllerGenerator {
   private routes: Array<Route>
@@ -42,7 +43,7 @@ export class ControllerGenerator {
   private splitPath({ path, method, module }) {
     const splitedPath = path.replace(/^\/|\/$/g, '').split('/')
 
-    const fn = (sp: [string], param: string) => {
+    const fn = (sp: [string], param: string): string => {
       const name = `${sp.pop() ?? ''}${param}`
       if (name && name.indexOf(':') >= 0) return fn(sp, 'By' + toCapital(name.replace(/:/g, '')))
       return method.toLowerCase() + toCapital(name)
@@ -78,18 +79,28 @@ export class ControllerGenerator {
       if (r.module !== module || r.path.split('/')[0] !== controller) return
 
       const sp = this.splitPath(r)
+      const dtos = this.dtoGenerator().generate(r, sp)
       const route = {
         desc: r.title,
         method: toCapital(r.method.toLowerCase()),
         responseHeader: this.handleResponseHeader(r.responseHeaders),
         service: this.resolveService(r.resolve),
-        ...this.dtoGenerator().generate(r, sp),
+        ...dtos,
         ...sp,
       }
       routes.push(route)
       this.imports[r.method.toLowerCase()] = true
       if (route['BodyDto']) this.imports['Body'] = true
       if (route['QueryDto']) this.imports['Query'] = true
+
+      if (r.id === src.id) {
+        await resolveService({
+          functionName: route.functionName,
+          service: r.resolve,
+          dtos,
+          dir: this.dir,
+        })
+      }
     })
 
     const njk = await readFile(join(__dirname, './tpl/controller.njk'), 'utf-8')
