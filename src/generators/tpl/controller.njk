@@ -7,7 +7,7 @@ import { {{name}} } from '{{service.import}}'
 
 @Controller('{{controllerPath}}')
 export class {{controllerName}}Controller {
-  constructor({% for name, s in services %}private readonly {{s.name}}: {{name}}{% endfor %}) {}
+  constructor({% for name, s in services %}private readonly {{s.name}}: {{name}},{% endfor %}) {}
   {% for route in routes %}
   {% if route.desc %}/** {{route.desc}} */{% endif %}
   @{{route.method}}('{{route.pathname}}')

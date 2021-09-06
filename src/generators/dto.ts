@@ -161,8 +161,9 @@ export class DtoGenerator {
     this.writeFile(option)
 
     const imps = Object.values(results).filter((s) => !['number', 'string', 'Date', 'any'].includes(s))
+    results.fileName = `./dto/${getFileName(option.functionName, 'dto')}`
     if (imps.length > 0) {
-      results.imports = 'import { ' + imps.join(',') + " } from './dto/" + getFileName(option.functionName, 'dto') + "'"
+      results.imports = `import { ${imps.join(',')} } from '${results.fileName}'`
     }
 
     return results

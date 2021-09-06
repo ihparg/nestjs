@@ -93,12 +93,14 @@ export class ControllerGenerator {
       if (route['BodyDto']) this.imports['Body'] = true
       if (route['QueryDto']) this.imports['Query'] = true
 
+      console.log('params', r.routeParams)
+
       if (r.id === src.id) {
         await resolveService({
-          functionName: route.functionName,
+          functionName: route.service.method,
           service: r.resolve,
           dtos,
-          dir: this.dir,
+          dir: join(this.dir, module, controller),
         })
       }
     })
