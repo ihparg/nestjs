@@ -79,7 +79,7 @@ export class ControllerGenerator {
       if (r.module !== module || r.path.split('/')[0] !== controller) return
 
       const sp = this.splitPath(r)
-      const dtos = this.dtoGenerator().generate(r, sp)
+      const dtos = this.dtoGenerator().generate(r, sp, src.id === r.id)
       const route = {
         desc: r.title,
         method: toCapital(r.method.toLowerCase()),
@@ -90,10 +90,9 @@ export class ControllerGenerator {
       }
       routes.push(route)
       this.imports[r.method.toLowerCase()] = true
-      if (route['BodyDto']) this.imports['Body'] = true
-      if (route['QueryDto']) this.imports['Query'] = true
-
-      console.log('params', r.routeParams)
+      if (route.BodyDto) this.imports['Body'] = true
+      if (route.QueryDto) this.imports['Query'] = true
+      if (route.params) this.imports['Param'] = true
 
       if (r.id === src.id) {
         await resolveService({
@@ -101,6 +100,7 @@ export class ControllerGenerator {
           service: r.resolve,
           dtos,
           dir: join(this.dir, module, controller),
+          params: route.params,
         })
       }
     })

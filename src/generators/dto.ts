@@ -23,6 +23,17 @@ interface Option {
   functionName: string
 }
 
+interface Result {
+  BodyDto?: string
+  QueryDto?: string
+  ResponseDto?: string
+  fileName?: string
+  imports?: string
+  params?: {
+    [key: string]: Field
+  }
+}
+
 export class DtoGenerator {
   private schemas: { [key: string]: Property }
   private tempRootName: string
@@ -144,9 +155,9 @@ export class DtoGenerator {
     await writeFileFix(path, content)
   }
 
-  generate(route: Route, option: Option): { [key: string]: string } {
+  generate(route: Route, option: Option, current: boolean): Result {
     this.dtos = {}
-    const results: { [key: string]: string } = {}
+    const results: Result = {}
 
     const createDto = (prop: Property, name: string) => {
       if (!prop) return
@@ -158,10 +169,12 @@ export class DtoGenerator {
     createDto(route.requestBody, 'Body')
     createDto(route.queryString, 'Query')
 
-    this.writeFile(option)
+    if (current) this.writeFile(option)
 
-    const imps = Object.values(results).filter((s) => !['number', 'string', 'Date', 'any'].includes(s))
+    const imps = Object.values(results).filter((s) => !['number', 'string', 'Date', 'any'].includes(s as string))
     results.fileName = `./dto/${getFileName(option.functionName, 'dto')}`
+    results.params = this.getFields(route.routeParams.properties, 'Params')
+
     if (imps.length > 0) {
       results.imports = `import { ${imps.join(',')} } from '${results.fileName}'`
     }

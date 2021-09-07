@@ -5,7 +5,7 @@ import { compile } from 'nunjucks'
 import { getFileName, toCapital } from './utils'
 
 const functionTemplate = `
-async {{functionName}}({% if body %}body: {{body}},{% endif %}{% if query %}query: {{query}},{% endif %}): Promise<{{response}}> {
+async {{functionName}}({{params}}): Promise<{{response}}> {
   // Write your code here.
 }
 `
@@ -14,9 +14,8 @@ export interface Service {
   dir: string
   service: string
   functionName: string
-  dtos: {
-    [key: string]: any
-  }
+  params: { [key: string]: any }
+  dtos: { [key: string]: any }
 }
 
 const appendToFile = async (data, file) => {
@@ -52,11 +51,18 @@ export const resolveService = async (option: Service) => {
   const [service, method] = option.service.split('.')
   const serviceName = getFileName(service, 'service')
   const file = join(option.dir, serviceName + '.ts')
+
+  const params = []
+  Object.keys(option.params ?? {}).forEach((n) => {
+    params.push(`${n}:${option.params[n].type}`)
+  })
+  if (option.dtos.BodyDto) params.push(`body:${option.dtos.BodyDto}`)
+  if (option.dtos.QueryDto) params.push(`query:${option.dtos.QueryDto}`)
+
   const funcCode = compile(functionTemplate).render({
     functionName: method,
     response: option.dtos.ResponseDto,
-    query: option.dtos.QueryDto,
-    body: option.dtos.BodyDto,
+    params: params.join(','),
   })
 
   const data = {

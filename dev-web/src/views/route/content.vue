@@ -146,6 +146,7 @@ export default {
       sending: false,
       errors: {},
       existedPath,
+      resolves: [],
       groups: Object.keys(groups),
       rule: Rule({
         pathExist: (value, f, callback) => {
@@ -215,7 +216,7 @@ export default {
   },
   created() {
     fetch.get(`/dev/resolve/list?force=true`).then(res => {
-      this.resolves = res
+      res.forEach(r => this.resolves.push(r))
     })
   },
   methods: {

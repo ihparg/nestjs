@@ -15,10 +15,12 @@ export class {{controllerName}}Controller {
   @Header('{{k}}', '{{v}}')
   {% endfor %}
   async {{route.functionName}}(
+  {% for p, t in route.params %}@Param('{{p}}') {{p}}: {{t.type}},{% endfor %}
   {% if route.BodyDto %}@Body() body: {{route.BodyDto}},{% endif %}
   {% if route.QueryDto %}@Query() query: {{route.QueryDto}},{% endif %}
   ){% if route.ResponseDto %}: Promise<{{route.ResponseDto}}>{% endif %} {
     const result = await this.{{route.service.name}}.{{route.service.method}}(
+    {% for p, t in route.params %}{{p}},{% endfor %}
     {% if route.BodyDto %}body,{% endif %}
     {% if route.QueryDto %}query,{% endif %}
     )
