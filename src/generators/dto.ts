@@ -1,4 +1,5 @@
 import { join } from 'path'
+import { existsSync } from 'fs'
 import { readFile } from 'fs/promises'
 import { compile } from 'nunjucks'
 import { Properties, Property, Route, Schema } from '../interface'
@@ -146,16 +147,18 @@ export class DtoGenerator {
     return type
   }
 
-  async writeFile(option: Option) {
+  async writeFile(option: Option, overwrite: boolean) {
     const { module, controller, functionName } = option
     const njk = await readFile(join(__dirname, './tpl/dto.njk'), 'utf-8')
     const content = compile(njk).render({ dtos: this.dtos })
-
     const path = join(this.dir, module, controller, 'dto', getFileName(functionName, 'dto') + '.ts')
-    await writeFileFix(path, content)
+
+    if (overwrite || !existsSync(path)) {
+      await writeFileFix(path, content)
+    }
   }
 
-  generate(route: Route, option: Option, current: boolean): Result {
+  generate(route: Route, option: Option, overwrite: boolean): Result {
     this.dtos = {}
     const results: Result = {}
 
@@ -169,7 +172,7 @@ export class DtoGenerator {
     createDto(route.requestBody, 'Body')
     createDto(route.queryString, 'Query')
 
-    if (current) this.writeFile(option)
+    this.writeFile(option, overwrite)
 
     const imps = Object.values(results).filter((s) => !['number', 'string', 'Date', 'any'].includes(s as string))
     results.fileName = `./dto/${getFileName(option.functionName, 'dto')}`

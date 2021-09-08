@@ -42,18 +42,21 @@ export class ControllerGenerator {
 
   private splitPath({ path, method, module }) {
     const splitedPath = path.replace(/^\/|\/$/g, '').split('/')
+    const prefix = path.indexOf(':') >= 0 ? method.toLowerCase() : ''
 
-    const fn = (sp: [string], param: string): string => {
-      const name = `${sp.pop() ?? ''}${param}`
+    const fn = (sp: string[], param: string): string => {
+      if (sp.length === 0) return param
+      const name = `${sp.pop()}${param}`
       if (name && name.indexOf(':') >= 0) return fn(sp, 'By' + toCapital(name.replace(/:/g, '')))
-      return method.toLowerCase() + toCapital(name)
+      // return method.toLowerCase() + toCapital(name)
+      return fn(sp, toCapital(name))
     }
 
     return {
       module,
       controller: splitedPath.shift(),
       pathname: '/' + splitedPath.join('/'),
-      functionName: fn(splitedPath, ''),
+      functionName: prefix + fn(splitedPath, ''),
     }
   }
 

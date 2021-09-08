@@ -3,9 +3,9 @@ import { customAlphabet } from 'nanoid'
 import { readdir, readFile, writeFile, unlink } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
 import { UidFunction } from './interface'
-import { resolvable } from './resolvable'
+//import { resolvable } from './resolvable'
 
-@resolvable('src/dev.service')
+//@resolvable('src/dev.service')
 export class DevService {
   nextUid: UidFunction
 
