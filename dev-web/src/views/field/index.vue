@@ -227,8 +227,8 @@ export default {
       if (!this.showComments) return ''
       const props = this.realValue
       const txt = []
-      const { description, min, max, maxLength, minLength } = props
-      if (min || max) txt.push(`值范围: [${min || ''}, ${max || ''}]`)
+      const { description, minimum, maximum, maxLength, minLength } = props
+      if (minimum || maximum) txt.push(`值范围: [${minimum || ''}, ${maximum || ''}]`)
       if (minLength || maxLength) txt.push(`长度范围: [${minLength || ''}, ${maxLength || ''}]`)
       if (props.enum) {
         txt.push(

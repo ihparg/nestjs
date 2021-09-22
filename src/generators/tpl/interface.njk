@@ -1,16 +1,16 @@
 {% macro createObject(fields) %} {
   {% for field in fields %}{{createField(field)}}{% endfor %}
 }{% endmacro %}
-{% macro createField(field) %}
-  {% if (field.desc) %}/** {{field.desc}} */{% endif %}
+{% macro createField(field, ignoreDesc) %}
+  {% if (field.desc and not ignoreDesc) %}/** {{field.desc}} */{% endif %}
   {% if (field.name) %}{{field.name}}{%if not(field.required)%}?{% endif %}: {% endif %}
   {%- if (field.type === 'object' or field.type === 'map') -%}
     {{createObject(field.fields)}}
   {%- elif (field.type === 'array') -%}
-    [{{createField(field.fields[0])}}]
+    {{createField(field.fields[0], true)}}[]
   {%- else -%}
     {{ field.type}}
-  {%- endif %}
+  {%- endif -%}
 {% endmacro %}
 /**
  * 根据Schema定义自动生成，不要手动修改

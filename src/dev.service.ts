@@ -1,11 +1,13 @@
 import { join } from 'path'
 import { customAlphabet } from 'nanoid'
+import { Injectable } from '@nestjs/common'
 import { readdir, readFile, writeFile, unlink } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
 import { UidFunction } from './interface'
 //import { resolvable } from './resolvable'
 
 //@resolvable('src/dev.service')
+@Injectable()
 export class DevService {
   nextUid: UidFunction
 

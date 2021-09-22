@@ -1,7 +1,7 @@
 export const resolves = []
 export const resolvePath = {}
 
-export const resolvable = (dir?: string) => (target) => {
+export const Resolvable = (dir?: string) => (target) => {
   const service = target.name
   resolvePath[service] = dir
   Object.getOwnPropertyNames(target.prototype).forEach((f) => {

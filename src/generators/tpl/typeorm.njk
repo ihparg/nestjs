@@ -9,13 +9,10 @@
   {%- if (field.type === 'object' or field.type === 'map') -%}
     {{createObject(field.fields)}}
   {%- elif (field.type === 'array') -%}
-    [{{createField(field.fields[0])}}]
+    {{createField(field.fields[0])}}[]
   {%- else -%}
-    {% if (field.objType) %}{{createObject(field.objType)}}
-    {% elif (field.jsType) %}{{field.jsType|safe}}
-    {% else %}{{field.type}}
-    {% endif %}
-  {%- endif %}
+    {% if (field.objType) %}{{createObject(field.objType)}}{% elif (field.jsType) %}{{field.jsType|safe}}{% else %}{{field.type}}{% endif -%}
+  {%- endif -%}
 {% endmacro %}
 /** 由 @graphi/nestjs/model.generator.ts 生成，不要手动修改 */
 import { Entity, Column, PrimaryGeneratedColumn{% if (relatedTypes) %}, {{relatedTypes}}{% endif %} } from 'typeorm'

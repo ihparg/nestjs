@@ -10,6 +10,7 @@ interface Field {
   type: string
   desc: string
   required: boolean
+  validator: string[]
 }
 
 interface Dto {
@@ -96,6 +97,8 @@ export class DtoGenerator {
         return 'string'
       case 'datetime':
         return 'Date'
+      case 'boolean':
+        return 'boolean'
       case 'json':
       case 'blob':
         return 'any'
@@ -104,10 +107,51 @@ export class DtoGenerator {
       case 'array':
         return this.getDefine(prop.items[0], name) + '[]'
       case 'map':
-        return '{ [key: string]: string }'
+        return `Map<string, ${this.getDefine(prop.items[0], name)}>`
       default:
         throw 'unknow type ' + prop.type
     }
+  }
+
+  getValidator(prop: Property): string[] {
+    const result = []
+
+    const setResult = (k: string, f: string) => {
+      if (prop[k]) result.push(`${f}(${prop[k]})`)
+    }
+
+    const setType = () => {
+      switch (prop.type) {
+        case 'integer':
+        case 'biginteger':
+        case 'decimal':
+        case 'double':
+          result.push('IsNumber()')
+          break
+        case 'string':
+        case 'uuid':
+        case 'text':
+          result.push('IsString()')
+          break
+        case 'datetime':
+          result.push('IsDate()')
+          break
+        case 'boolean':
+          result.push('IsBoolean()')
+          break
+        default:
+          result.push('ValidateNested()')
+      }
+    }
+
+    if (!prop.required) result.push('IsOptional()')
+    setResult('minLength', 'MinLength')
+    setResult('maxLength', 'MaxLength')
+    setResult('minimum', 'Min')
+    setResult('maximum', 'Max')
+    setType()
+
+    return result
   }
 
   getFields(props: Properties, path: string) {
@@ -121,6 +165,7 @@ export class DtoGenerator {
       fields[name] = {
         required: p.required,
         desc: p.description,
+        validator: this.getValidator(p),
         type,
       }
     })
@@ -171,6 +216,8 @@ export class DtoGenerator {
     createDto(route.responseBody, 'Response')
     createDto(route.requestBody, 'Body')
     createDto(route.queryString, 'Query')
+
+    //console.log(JSON.stringify(this.dtos, null, 2))
 
     this.writeFile(option, overwrite)
 

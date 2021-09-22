@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { resolvable } from '@graphi/nestjs/resolvable'
+import { Resolvable } from '@graphi/nestjs/resolvable'
 {% if imports %}{{imports|safe}}{% endif %}
 
 @Injectable()
-@resolvable('{{servicePath}}')
+@Resolvable('{{servicePath}}')
 export class {{serviceName}} {
   {{funcCode|safe}}
 }

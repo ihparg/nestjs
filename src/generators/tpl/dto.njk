@@ -1,8 +1,13 @@
+import * as CVR from 'class-validator'
+
 {% for name, dto in dtos %}
 {% if dto.desc %}/** {{dto.desc}} */{% endif %}
 export class {{name}} {
   {% for field, prop in dto.fields %}
   {% if prop.desc %}/** {{prop.desc}} */{% endif %}
+  {% for v in prop.validator -%}
+  @CVR.{{ v }}
+  {% endfor -%}
   {{field}}{%if not(prop.required)%}?{% endif %}: {{prop.type|safe}}
   {% endfor %}
 }
