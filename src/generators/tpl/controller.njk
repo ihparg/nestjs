@@ -1,8 +1,9 @@
 import { Controller, {{imports}} } from '@nestjs/common'
+import { Response } from '@graphi/nestjs/response'
 {% for name, service in services -%}
 import { {{name}} } from '{{service.import}}'
 {% endfor %}{% for route in routes -%}
-{% if route.imports %}{{route.imports|safe}}{% endif %}
+{% if route.imports %}{{route.imports.replace('[]', '')|safe}}{% endif %}
 {% endfor %}
 
 @Controller('{{controllerPath}}')
@@ -14,6 +15,7 @@ export class {{controllerName}}Controller {
   {% for k, v in route.responseHeader %}
   @Header('{{k}}', '{{v}}')
   {% endfor %}
+  {% if route.ResponseDto -%}@Response({{route.ResponseDto.replace('[]', '')}}){% endif %}
   async {{route.functionName}}(
   {% for p, t in route.params %}@Param('{{p}}') {{p}}: {{t.type}},{% endfor %}
   {% if route.BodyDto %}@Body() body: {{route.BodyDto}},{% endif %}

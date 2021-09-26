@@ -1,4 +1,6 @@
-import * as CVR from 'class-validator'
+import { {{ validators }} } from 'class-validator'
+//import { Type, Expose } from 'class-transformer'
+import { Type, Expose } from '@graphi/nestjs/validator'
 
 {% for name, dto in dtos %}
 {% if dto.desc %}/** {{dto.desc}} */{% endif %}
@@ -6,8 +8,9 @@ export class {{name}} {
   {% for field, prop in dto.fields %}
   {% if prop.desc %}/** {{prop.desc}} */{% endif %}
   {% for v in prop.validator -%}
-  @CVR.{{ v }}
+  @{{ v|safe }}
   {% endfor -%}
+  @Expose()
   {{field}}{%if not(prop.required)%}?{% endif %}: {{prop.type|safe}}
   {% endfor %}
 }

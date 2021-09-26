@@ -8,6 +8,10 @@ export interface Property {
   description?: string
   items?: Array<Property>
   circleRef: string
+  enum?: {
+    text: string
+    value: string
+  }[]
 }
 
 export interface Properties {
@@ -53,3 +57,7 @@ export interface Response<T> {
 }
 
 export type UidFunction = () => string
+
+export type ClassConstructor<T> = {
+  new (...args: any[]): T
+}

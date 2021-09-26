@@ -17,6 +17,9 @@ const getInterfaceName = (name): string => {
 }
 
 const convertType = (props: Property): string => {
+  if (props.enum) {
+    return props.enum.map((e) => (props.type === 'string' ? '"' + e.value + '"' : e.value)).join('|')
+  }
   switch (props.type) {
     case 'integer':
     case 'biginteger':

@@ -30,6 +30,7 @@ export class RouteController {
 
   @Post('/save')
   async saveRoute(@Body() body: Route): Promise<Route> {
+    console.log(body)
     if (!body.id) body.id = this.devService.nextUid()
 
     let routes = await this.getList()
@@ -42,11 +43,11 @@ export class RouteController {
 
     await this.devService.saveFile(this.devService.resolvePath(this.dir, body.id), body)
 
-    const { DEV_CONTROLLER_PATH } = process.env
-    if (DEV_CONTROLLER_PATH) {
+    const { DEV_MODULE_PATH } = process.env
+    if (DEV_MODULE_PATH) {
       routes = await this.getList()
       const schemas = await this.devService.getJsonFileList(process.env.DEV_SCHEMA_PATH || 'data/schemas')
-      const cg = new ControllerGenerator(routes, schemas, DEV_CONTROLLER_PATH)
+      const cg = new ControllerGenerator(routes, schemas, DEV_MODULE_PATH)
       await cg.generate(body)
     }
 

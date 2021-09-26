@@ -6,7 +6,7 @@ export const getProps = t => {
       break
     case 'decimal':
     case 'double':
-      props = [...props, 'minimum', 'maximum', 'defaultValue', 'example']
+      props = [...props, 'enum', 'minimum', 'maximum', 'defaultValue', 'example']
       break
     case 'array':
       props = [...props, 'maxItems', 'minItems', 'items', 'example']

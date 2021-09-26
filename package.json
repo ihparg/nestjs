@@ -26,6 +26,8 @@
     "@nestjs/common": "^8.0.6",
     "@nestjs/config": "^1.0.1",
     "@nestjs/core": "^8.0.6",
+    "class-transformer": "^0.4.0",
+    "class-validator": "^0.13.1",
     "nanoid": "^3.1.25",
     "nunjucks": "^3.2.3",
     "reflect-metadata": "^0.1.13",
@@ -35,7 +37,9 @@
   "peerDependencies": {
     "@nestjs/common": "> 8.0.0",
     "@nestjs/config": "> 1.0.0",
-    "@nestjs/core": "> 8.0.0"
+    "@nestjs/core": "> 8.0.0",
+    "class-transformer": "> 0.4.0",
+    "class-validator": "> 0.13.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.1.1",

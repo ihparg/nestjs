@@ -1,5 +1,6 @@
 import { join } from 'path'
 import { compile } from 'nunjucks'
+import { existsSync } from 'fs'
 import { readFile } from 'fs/promises'
 import { Route, Property, Schema } from '../interface'
 import { resolvePath } from '../resolvable'
@@ -73,6 +74,13 @@ export class ControllerGenerator {
     return obj
   }
 
+  async createModule(path, name) {
+    if (existsSync(path)) return
+    const njk = await readFile(join(__dirname, './tpl/module.njk'), 'utf-8')
+    const content = compile(njk).render({ className: toCapital(name), name })
+    await writeFileFix(path, content)
+  }
+
   async generate(src: Route) {
     const { module, controller } = this.splitPath(src)
 
@@ -125,5 +133,7 @@ export class ControllerGenerator {
     const path = join(this.dir, module, controller, fileName + '.ts')
 
     await writeFileFix(path, content)
+
+    this.createModule(join(this.dir, module, controller, getFileName(controller, 'module') + '.ts'), controller)
   }
 }

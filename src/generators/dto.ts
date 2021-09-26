@@ -40,6 +40,8 @@ export class DtoGenerator {
   private schemas: { [key: string]: Property }
   private tempRootName: string
   private dtos: { [key: string]: Dto }
+  private usedValidators: { [key: string]: boolean }
+  private isQueryBuild: boolean
   private dir: string
 
   constructor(schemas: Array<Schema>, dir: string) {
@@ -84,6 +86,9 @@ export class DtoGenerator {
     if (prop.circleRef) {
       return this.getDtoName(prop)
     }
+    if (prop.enum) {
+      return prop.enum.map((e) => (prop.type === 'string' ? '"' + e.value + '"' : e.value)).join('|')
+    }
 
     switch (prop.type) {
       case 'integer':
@@ -109,12 +114,14 @@ export class DtoGenerator {
       case 'map':
         return `Map<string, ${this.getDefine(prop.items[0], name)}>`
       default:
-        throw 'unknow type ' + prop.type
+        console.error('unknow type ' + prop.type, name)
+        return 'undefined'
+      // throw 'unknow type ' + prop.type
     }
   }
 
-  getValidator(prop: Property): string[] {
-    const result = []
+  getValidator(prop: Property, name: string): string[] {
+    let result = []
 
     const setResult = (k: string, f: string) => {
       if (prop[k]) result.push(`${f}(${prop[k]})`)
@@ -127,19 +134,28 @@ export class DtoGenerator {
         case 'decimal':
         case 'double':
           result.push('IsNumber()')
+          result.push('Type(() => Number)')
           break
         case 'string':
         case 'uuid':
         case 'text':
           result.push('IsString()')
+          result.push('Type(() => String)')
           break
         case 'datetime':
           result.push('IsDate()')
+          result.push('Type(() => Date)')
           break
         case 'boolean':
           result.push('IsBoolean()')
+          result.push('Type(() => Boolean)')
+          break
+        case 'array':
+          const r = this.getValidator(prop.items[0], name)
+          result = result.concat(r)
           break
         default:
+          result.push(`Type(() => ${name})`)
           result.push('ValidateNested()')
       }
     }
@@ -150,6 +166,14 @@ export class DtoGenerator {
     setResult('minimum', 'Min')
     setResult('maximum', 'Max')
     setType()
+    if (prop.enum) {
+      result.push(`IsIn([${prop.enum.map((e) => (prop.type === 'string' ? '"' + e.value + '"' : e.value)).join(',')}])`)
+    }
+
+    result.forEach((r) => {
+      const k = r.replace(/\(.*/g, '')
+      if (k !== 'Type') this.usedValidators[k] = true
+    })
 
     return result
   }
@@ -165,7 +189,7 @@ export class DtoGenerator {
       fields[name] = {
         required: p.required,
         desc: p.description,
-        validator: this.getValidator(p),
+        validator: this.getValidator(p, path + toCapital(name)),
         type,
       }
     })
@@ -195,7 +219,7 @@ export class DtoGenerator {
   async writeFile(option: Option, overwrite: boolean) {
     const { module, controller, functionName } = option
     const njk = await readFile(join(__dirname, './tpl/dto.njk'), 'utf-8')
-    const content = compile(njk).render({ dtos: this.dtos })
+    const content = compile(njk).render({ dtos: this.dtos, validators: Object.keys(this.usedValidators).join(',') })
     const path = join(this.dir, module, controller, 'dto', getFileName(functionName, 'dto') + '.ts')
 
     if (overwrite || !existsSync(path)) {
@@ -205,6 +229,8 @@ export class DtoGenerator {
 
   generate(route: Route, option: Option, overwrite: boolean): Result {
     this.dtos = {}
+    this.usedValidators = {}
+    //this.isQueryBuild = false
     const results: Result = {}
 
     const createDto = (prop: Property, name: string) => {
@@ -215,6 +241,7 @@ export class DtoGenerator {
 
     createDto(route.responseBody, 'Response')
     createDto(route.requestBody, 'Body')
+    //this.isQueryBuild = true
     createDto(route.queryString, 'Query')
 
     //console.log(JSON.stringify(this.dtos, null, 2))
