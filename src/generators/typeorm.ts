@@ -139,6 +139,18 @@ export class TypeOrmGenerator {
     return this.underscore ? toUnderscore(name) : name
   }
 
+  getJoinTable(target: string, inverse: string): string {
+    const tableName = [target, inverse]
+      .sort((a, b) => a.localeCompare(b))
+      .map((s) => this.convertFieldName(s))
+      .join('_')
+
+    const targetId = this.convertFieldName(target + 'Id')
+    const inverseId = this.convertFieldName(inverse + 'Id')
+
+    return `@JoinTable({ name: '${tableName}', joinColumn: { name: '${inverseId}' }, inverseJoinColumn: { name: '${targetId}' } })`
+  }
+
   private getRef(prop: Property, name: string, isMany: boolean) {
     const { ref } = prop
     const refClassName = ref[0].toUpperCase() + ref.slice(1)
@@ -170,7 +182,7 @@ export class TypeOrmGenerator {
     if (relatedField.name) {
       if (isMany) {
         refType = relatedField.isMany
-          ? `@ManyToMany(() => ${refClassName})\n@JoinTable()`
+          ? `@ManyToMany(() => ${refClassName})\n${this.getJoinTable(refClassName, this.className)}`
           : `@OneToMany(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
       } else {
         refType = `@ManyToOne(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
