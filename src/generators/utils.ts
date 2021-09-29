@@ -20,7 +20,10 @@ export const toCamelCase = (str: string): string => {
 }
 
 export const toUnderscore = (str: string): string => {
-  return str.replace(/([A-Z])/g, '_$1').toLowerCase()
+  return str
+    .replace(/([A-Z])/g, '_$1')
+    .toLowerCase()
+    .replace(/^_/, '')
 }
 
 export const toCapital = (str: string): string => {

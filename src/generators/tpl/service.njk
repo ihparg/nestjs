@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { Resolvable } from '@graphi/nestjs/resolvable'
-{% if imports %}{{imports|safe}}{% endif %}
+import { Resolvable } from '@graphi/nestjs'
+{% if imports %}{{imports.replace('[]', '')|safe}}{% endif %}
 
 @Injectable()
 @Resolvable('{{servicePath}}')

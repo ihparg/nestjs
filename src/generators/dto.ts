@@ -41,7 +41,6 @@ export class DtoGenerator {
   private tempRootName: string
   private dtos: { [key: string]: Dto }
   private usedValidators: { [key: string]: boolean }
-  private isQueryBuild: boolean
   private dir: string
 
   constructor(schemas: Array<Schema>, dir: string) {
@@ -51,7 +50,7 @@ export class DtoGenerator {
 
   getRef(prop: Property) {
     const ref = { ...this.schemas[prop.ref] }
-    ;['description', 'reauired', 'items', 'circleRef'].forEach((key) => {
+    ;['description', 'required', 'items', 'circleRef'].forEach((key) => {
       if (Object.prototype.hasOwnProperty.call(prop, key)) {
         ref[key] = prop[key]
       }
@@ -63,7 +62,7 @@ export class DtoGenerator {
         .forEach((key) => {
           ref.properties[key] = prop.properties[key]
           if (ref.properties[key].ref) {
-            ref.properties[key] = this.getRef(ref.properties[key])
+            ref.properties[key] = this.getRef(prop.properties[key])
           }
         })
     }
@@ -230,7 +229,6 @@ export class DtoGenerator {
   generate(route: Route, option: Option, overwrite: boolean): Result {
     this.dtos = {}
     this.usedValidators = {}
-    //this.isQueryBuild = false
     const results: Result = {}
 
     const createDto = (prop: Property, name: string) => {
@@ -241,10 +239,7 @@ export class DtoGenerator {
 
     createDto(route.responseBody, 'Response')
     createDto(route.requestBody, 'Body')
-    //this.isQueryBuild = true
     createDto(route.queryString, 'Query')
-
-    //console.log(JSON.stringify(this.dtos, null, 2))
 
     this.writeFile(option, overwrite)
 

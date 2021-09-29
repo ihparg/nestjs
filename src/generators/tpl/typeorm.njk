@@ -20,7 +20,7 @@ import { Entity, Column, PrimaryGeneratedColumn{% if (relatedTypes) %}, {{relate
 {{imp|safe}}
 {% endfor %}
 
-@Entity()
+@Entity('{{tableName}}')
 export class {{name}} {
   {% if (primaryId) %}
   /** 主键 */

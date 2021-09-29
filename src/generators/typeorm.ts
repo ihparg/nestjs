@@ -3,7 +3,7 @@ import { join } from 'path'
 import { compile } from 'nunjucks'
 import { Properties, Property, Schema } from '../interface'
 import { getField as getFieldInterface } from './interface'
-import { writeFileFix, getFileName } from './utils'
+import { writeFileFix, getFileName, toUnderscore } from './utils'
 
 interface FieldType {
   sqlType: any
@@ -12,7 +12,7 @@ interface FieldType {
   refType?: string
 }
 
-const isERModel = (type) => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
+const isERModel = (type: string): boolean => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
 export class TypeOrmGenerator {
   private relatedTypes: { [key: string]: boolean }
@@ -22,6 +22,7 @@ export class TypeOrmGenerator {
   private path: string
   private schema: Schema
   private schemas: Array<Schema>
+  private underscore: boolean = process.env.DEV_TYPEORM_UNDERSCORE === 'true'
 
   constructor(schema: Schema, path: string, schemas: Array<Schema>) {
     this.relatedTypes = {}
@@ -38,16 +39,18 @@ export class TypeOrmGenerator {
     const props = this.schema.content.properties
     const options = {
       name: this.className,
-      primaryId: this.getType(props.id),
+      primaryId: this.getType(props.id, 'id'),
       fields: this.getFields(props),
       relatedTypes: Object.keys(this.relatedTypes).join(','),
       imports: this.getImports(),
-      tableName:
+      tableName: toUnderscore(this.name),
+      /*
         this.name[0].toLowerCase() +
         this.name
           .slice(1)
           .replace(/([A-Z])/g, '_$1')
           .toLowerCase(),
+          */
     }
     const tpl = compile(njk)
     const content = tpl.render(options)
@@ -72,7 +75,7 @@ export class TypeOrmGenerator {
     } else {
       return {
         ...getFieldInterface(prop, name),
-        ...this.getType(prop),
+        ...this.getType(prop, name),
       }
     }
   }
@@ -82,33 +85,38 @@ export class TypeOrmGenerator {
     Object.keys(props).forEach((name) => {
       const p = props[name]
       if (name === 'id') return
-      fields.push(this.getField(p, name))
+      const field = this.getField(p, name)
+      fields.push(field)
     })
     fields.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
     return fields
   }
 
-  private getType(prop: Property) {
+  private getType(prop: Property, name: string) {
     if (!prop) return undefined
     let type: FieldType
     switch (prop.type) {
       case 'uuid':
-        type = { jsType: 'string', sqlType: 'uuid' }
+        type = { jsType: 'string', sqlType: { type: 'uuid' } }
         break
       case 'integer':
         type = { jsType: 'number', sqlType: { type: 'int' } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       // 不建议使用double和float，使用decimal类型
       case 'double':
       case 'float':
       case 'decimal':
         type = { jsType: 'number', sqlType: { type: 'decimal' } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'biginteger':
         type = { jsType: 'number', sqlType: { type: 'bigint' } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'text':
         type = { jsType: 'string', sqlType: { type: 'text' } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'object':
       case 'map':
@@ -116,13 +124,19 @@ export class TypeOrmGenerator {
         type = { sqlType: { type: 'simple-json' } }
         break
       case 'json':
-        type = { jsType: 'any', sqlType: 'json' }
+        type = { jsType: 'any', sqlType: { type: 'json' } }
         break
       default:
-        type = { jsType: prop.type, sqlType: prop.type }
+        type = { jsType: prop.type, sqlType: { type: 'varchar' } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
     }
+    if (this.underscore) type.sqlType.name = toUnderscore(name)
     type.sqlType = JSON.stringify(type.sqlType)
     return type
+  }
+
+  convertFieldName(name: string): string {
+    return this.underscore ? toUnderscore(name) : name
   }
 
   private getRef(prop: Property, name: string, isMany: boolean) {
@@ -136,7 +150,7 @@ export class TypeOrmGenerator {
     if (!isERModel(target.tag)) {
       return {
         ...getFieldInterface(target.content, name),
-        ...this.getType(target.content),
+        ...this.getType(target.content, name),
       }
     }
 
@@ -156,16 +170,18 @@ export class TypeOrmGenerator {
     if (relatedField.name) {
       if (isMany) {
         refType = relatedField.isMany
-          ? `@ManyToMany(() => ${refClassName})`
-          : `@OneToMany(() => ${refClassName}, (e) => e.${relatedField.name})`
+          ? `@ManyToMany(() => ${refClassName})\n@JoinTable()`
+          : `@OneToMany(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
       } else {
-        refType = `@ManyToOne(() => ${refClassName}, (e) => e.${relatedField.name})`
+        refType = `@ManyToOne(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
+        isJoinColumn = true
       }
     } else {
       if (isMany) throw new Error(`没有找到 ${ref}.${name} 的引用`)
       refType = `@OneToOne(() => ${refClassName})`
       isJoinColumn = true
     }
+    if (isJoinColumn) refType += `\n@JoinColumn({ name: '${this.convertFieldName(name + 'Id')}' })`
     const jsType = isMany ? `${refClassName}[]` : refClassName
 
     // imports 用
@@ -174,6 +190,8 @@ export class TypeOrmGenerator {
     }
     const rt = ['ManyToMany', 'ManyToOne', 'OneToMany', 'OneToOne'].find((s) => refType.indexOf(s) > 0)
     if (rt) this.relatedTypes[rt] = true
+    if (refType.indexOf('JoinColumn') > 0) this.relatedTypes.JoinColumn = true
+    if (refType.indexOf('JoinTable') > 0) this.relatedTypes.JoinTable = true
 
     return {
       name,

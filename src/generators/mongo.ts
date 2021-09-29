@@ -112,6 +112,7 @@ export class MongoGenerator {
         break
       case 'integer':
         type = { jsType: 'number', sqlType: { required: prop.required } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       // 不建议使用double和float，使用decimal类型
       case 'double':
@@ -119,14 +120,15 @@ export class MongoGenerator {
       case 'decimal':
       case 'biginteger':
         type = { jsType: 'number', sqlType: { required: prop.required } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'text':
         type = { jsType: 'string', sqlType: { required: prop.required } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'object':
       case 'map':
         const fields = getFieldInterface(prop).fields
-        console.log(fields)
         type = { jsType: 'Record<string, any>', sqlType: `raw(${interfaceTpl.render({ fields })})` }
         break
       case 'array':
@@ -145,6 +147,7 @@ export class MongoGenerator {
         break
       default:
         type = { jsType: prop.type, sqlType: { required: prop.required } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
     }
     if (typeof type.sqlType !== 'string') {
       type.sqlType = JSON.stringify(type.sqlType)

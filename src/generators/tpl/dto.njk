@@ -1,6 +1,5 @@
 import { {{ validators }} } from 'class-validator'
-//import { Type, Expose } from 'class-transformer'
-import { Type, Expose } from '@graphi/nestjs/validator'
+import { Type, Expose } from 'class-transformer'
 
 {% for name, dto in dtos %}
 {% if dto.desc %}/** {{dto.desc}} */{% endif %}

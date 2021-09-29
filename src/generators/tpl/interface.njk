@@ -9,7 +9,7 @@
   {%- elif (field.type === 'array') -%}
     {{createField(field.fields[0], true)}}[]
   {%- else -%}
-    {{ field.type}}
+    {{ field.type|safe}}
   {%- endif -%}
 {% endmacro %}
 /**

@@ -30,7 +30,6 @@ export class RouteController {
 
   @Post('/save')
   async saveRoute(@Body() body: Route): Promise<Route> {
-    console.log(body)
     if (!body.id) body.id = this.devService.nextUid()
 
     let routes = await this.getList()

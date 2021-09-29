@@ -6,7 +6,7 @@ import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
 import { MongoGenerator } from './generators/mongo'
 
-const isERModel = (type) => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
+const isERModel = (type: string): boolean => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
 @Controller('dev/schema')
 export class SchemaController {

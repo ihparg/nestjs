@@ -1,3 +1,5 @@
+import { ValidationError } from '@nestjs/common'
+
 export interface Property {
   required?: boolean
   type: string
@@ -61,3 +63,5 @@ export type UidFunction = () => string
 export type ClassConstructor<T> = {
   new (...args: any[]): T
 }
+
+export type ResponseFunction = <T>(data: T, errors: ValidationError[]) => unknown

@@ -1,5 +1,5 @@
 import { Controller, {{imports}} } from '@nestjs/common'
-import { Response } from '@graphi/nestjs/response'
+import { ResponseValidator } from '@graphi/nestjs'
 {% for name, service in services -%}
 import { {{name}} } from '{{service.import}}'
 {% endfor %}{% for route in routes -%}
@@ -15,7 +15,7 @@ export class {{controllerName}}Controller {
   {% for k, v in route.responseHeader %}
   @Header('{{k}}', '{{v}}')
   {% endfor %}
-  {% if route.ResponseDto -%}@Response({{route.ResponseDto.replace('[]', '')}}){% endif %}
+  {% if route.ResponseDto -%}@ResponseValidator({{route.ResponseDto.replace('[]', '')}}){% endif %}
   async {{route.functionName}}(
   {% for p, t in route.params %}@Param('{{p}}') {{p}}: {{t.type}},{% endfor %}
   {% if route.BodyDto %}@Body() body: {{route.BodyDto}},{% endif %}
