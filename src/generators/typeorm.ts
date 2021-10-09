@@ -44,13 +44,6 @@ export class TypeOrmGenerator {
       relatedTypes: Object.keys(this.relatedTypes).join(','),
       imports: this.getImports(),
       tableName: toUnderscore(this.name),
-      /*
-        this.name[0].toLowerCase() +
-        this.name
-          .slice(1)
-          .replace(/([A-Z])/g, '_$1')
-          .toLowerCase(),
-          */
     }
     const tpl = compile(njk)
     const content = tpl.render(options)
@@ -202,7 +195,7 @@ export class TypeOrmGenerator {
     }
     const rt = ['ManyToMany', 'ManyToOne', 'OneToMany', 'OneToOne'].find((s) => refType.indexOf(s) > 0)
     if (rt) this.relatedTypes[rt] = true
-    if (refType.indexOf('JoinColumn') > 0) this.relatedTypes.JoinColumn = true
+    if (isJoinColumn) this.relatedTypes.JoinColumn = true
     if (refType.indexOf('JoinTable') > 0) this.relatedTypes.JoinTable = true
 
     return {

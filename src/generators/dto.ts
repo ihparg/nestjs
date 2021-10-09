@@ -174,7 +174,7 @@ export class DtoGenerator {
       if (k !== 'Type') this.usedValidators[k] = true
     })
 
-    return result
+    return Array.from(new Set(result))
   }
 
   getFields(props: Properties, path: string) {
