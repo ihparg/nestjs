@@ -22,9 +22,9 @@ export class TypeOrmGenerator {
   private path: string
   private schema: Schema
   private schemas: Array<Schema>
-  private underscore: boolean = process.env.DEV_TYPEORM_UNDERSCORE === 'true'
+  private underscore: boolean
 
-  constructor(schema: Schema, path: string, schemas: Array<Schema>) {
+  constructor(schema: Schema, path: string, schemas: Array<Schema>, underscore: boolean) {
     this.relatedTypes = {}
     this.relatedEntities = {}
     this.name = schema.name
@@ -32,10 +32,11 @@ export class TypeOrmGenerator {
     this.className = schema.name[0].toUpperCase() + schema.name.slice(1)
     this.schema = schema
     this.schemas = schemas
+    this.underscore = underscore
   }
 
   async generate() {
-    const njk = await readFile(join(__dirname, './tpl/typeorm.njk'), 'utf-8')
+    const njk = await readFile(join(__dirname, '../tpl/typeorm.njk'), 'utf-8')
     const props = this.schema.content.properties
     const options = {
       name: this.className,

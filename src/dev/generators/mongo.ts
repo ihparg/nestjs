@@ -43,7 +43,7 @@ export class MongoGenerator {
   }
 
   async generate() {
-    const njk = await readFile(join(__dirname, './tpl/mongo.njk'), 'utf-8')
+    const njk = await readFile(join(__dirname, '../tpl/mongo.njk'), 'utf-8')
     const props = this.schema.content.properties
     const options = {
       name: this.className,

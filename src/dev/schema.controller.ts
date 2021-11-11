@@ -1,19 +1,20 @@
-import { Body, Controller, Get, Post, Delete } from '@nestjs/common'
+import { Body, Controller, Get, Post, Delete, Inject } from '@nestjs/common'
 import { join } from 'path'
 import { DevService } from './dev.service'
-import { Schema, DeleteBody } from './interface'
+import { Schema, DeleteBody, DevOption } from './interface'
 import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
 import { MongoGenerator } from './generators/mongo'
+import { DEV_OPTION } from './constants'
 
 const isERModel = (type: string): boolean => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
 
 @Controller('dev/schema')
 export class SchemaController {
-  constructor(private readonly devService: DevService) {}
+  constructor(private readonly devService: DevService, @Inject(DEV_OPTION) private readonly option: DevOption) {}
 
   get dir(): string {
-    return process.env.DEV_SCHEMA_PATH || 'data/schemas'
+    return this.option.schemaPath || 'data/schemas'
   }
 
   @Get('/list')
@@ -27,17 +28,17 @@ export class SchemaController {
     if (!body.id) body.id = this.devService.nextUid()
     await this.devService.saveFile(this.devService.resolvePath(this.dir, body.id), body)
 
-    const { DEV_INTERFACE_PATH, DEV_TYPEORM_ENTITY_PATH, DEV_MONGODB_SCHEMA_PATH } = process.env
+    const { interfacePath, typeormEntityPath, mongodbSchemaPath } = this.option
 
     const schemas = await this.getList()
-    if (DEV_INTERFACE_PATH) {
-      await generateInterface(schemas, join(process.cwd(), DEV_INTERFACE_PATH))
+    if (interfacePath) {
+      await generateInterface(schemas, join(process.cwd(), interfacePath))
     }
 
-    if (DEV_TYPEORM_ENTITY_PATH && isERModel(body.tag)) {
-      await new TypeOrmGenerator(body, DEV_TYPEORM_ENTITY_PATH, schemas).generate()
-    } else if (DEV_MONGODB_SCHEMA_PATH && body.tag === 'mongodb') {
-      await new MongoGenerator(body, DEV_MONGODB_SCHEMA_PATH, schemas).generate()
+    if (typeormEntityPath && isERModel(body.tag)) {
+      await new TypeOrmGenerator(body, typeormEntityPath, schemas, this.option.typeormUnderscore).generate()
+    } else if (mongodbSchemaPath && body.tag === 'mongodb') {
+      await new MongoGenerator(body, mongodbSchemaPath, schemas).generate()
     }
 
     return body
@@ -47,10 +48,10 @@ export class SchemaController {
   async deleteRoute(@Body() body: DeleteBody) {
     await this.devService.deleteFile(this.devService.resolvePath(this.dir, body.id))
 
-    const { DEV_INTERFACE_PATH } = process.env
+    const { interfacePath } = this.option
     const schemas = await this.getList()
-    if (DEV_INTERFACE_PATH) {
-      await generateInterface(schemas, join(process.cwd(), DEV_INTERFACE_PATH))
+    if (interfacePath) {
+      await generateInterface(schemas, join(process.cwd(), interfacePath))
     }
   }
 }

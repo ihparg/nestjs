@@ -42,7 +42,7 @@ const appendToFile = async (data, file) => {
 }
 
 const createFile = async (data, file) => {
-  const njk = await readFile(join(__dirname, './tpl/service.njk'), 'utf-8')
+  const njk = await readFile(join(__dirname, '../tpl/service.njk'), 'utf-8')
   const content = compile(njk).render(data)
   await writeFile(file, content)
 }

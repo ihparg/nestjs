@@ -6,8 +6,8 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
-    "dev:web": "cd dev-web && yarn dev",
-    "dev:server": "nest start --watch",
+    "start:web": "cd dev-web && yarn dev",
+    "start:dev": "nest start --watch",
     "build:web": "cd dev-web && yarn && yarn build",
     "build": "nest build && yarn build:web && cp package.json dist/package.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@nestjs/common": "^8.0.6",
-    "@nestjs/config": "^1.0.1",
     "@nestjs/core": "^8.0.6",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
@@ -36,7 +35,6 @@
   },
   "peerDependencies": {
     "@nestjs/common": "> 8.0.0",
-    "@nestjs/config": "> 1.0.0",
     "@nestjs/core": "> 8.0.0",
     "class-transformer": "> 0.4.0",
     "class-validator": "> 0.13.1"

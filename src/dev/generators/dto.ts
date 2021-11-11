@@ -217,7 +217,7 @@ export class DtoGenerator {
 
   async writeFile(option: Option, overwrite: boolean) {
     const { module, controller, functionName } = option
-    const njk = await readFile(join(__dirname, './tpl/dto.njk'), 'utf-8')
+    const njk = await readFile(join(__dirname, '../tpl/dto.njk'), 'utf-8')
     const content = compile(njk).render({ dtos: this.dtos, validators: Object.keys(this.usedValidators).join(',') })
     const path = join(this.dir, module, controller, 'dto', getFileName(functionName, 'dto') + '.ts')
 

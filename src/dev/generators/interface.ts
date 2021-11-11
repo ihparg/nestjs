@@ -76,7 +76,7 @@ const getFields = (props: Properties): Array<Field> => {
 }
 
 export const generateInterface = async (schemas: Array<Schema>, filePath: string) => {
-  const njk = await readFile(join(__dirname, './tpl/interface.njk'), 'utf-8')
+  const njk = await readFile(join(__dirname, '../tpl/interface.njk'), 'utf-8')
   const tpl = compile(njk)
   const list = schemas.map((schema: Schema) => {
     schema.iname = getInterfaceName(schema.name)

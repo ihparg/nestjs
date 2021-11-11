@@ -20,12 +20,14 @@ export class ControllerGenerator {
   private imports: { [key: string]: boolean }
   private dtoGenerator: { (): DtoGenerator }
   private dir: string
+  private apiPrefix: string
 
-  constructor(routes: Array<Route>, schemas: Array<Schema>, dir: string) {
+  constructor(routes: Array<Route>, schemas: Array<Schema>, dir: string, apiPrefix: string) {
     this.routes = routes
     this.services = {}
     this.dtoGenerator = () => new DtoGenerator(schemas, dir)
     this.dir = dir
+    this.apiPrefix = apiPrefix
   }
 
   private resolveService(str: string) {
@@ -76,7 +78,7 @@ export class ControllerGenerator {
 
   async createModule(path, name) {
     if (existsSync(path)) return
-    const njk = await readFile(join(__dirname, './tpl/module.njk'), 'utf-8')
+    const njk = await readFile(join(__dirname, '../tpl/module.njk'), 'utf-8')
     const content = compile(njk).render({ className: toCapital(name), name })
     await writeFileFix(path, content)
   }
@@ -116,11 +118,11 @@ export class ControllerGenerator {
       }
     })
 
-    const njk = await readFile(join(__dirname, './tpl/controller.njk'), 'utf-8')
+    const njk = await readFile(join(__dirname, '../tpl/controller.njk'), 'utf-8')
     const options = {
       routes,
       services: this.services,
-      controllerPath: (process.env.API_PREFIX || '') + '/' + (module ? module + '/' : '') + controller,
+      controllerPath: (this.apiPrefix || '') + '/' + (module ? module + '/' : '') + controller,
       controllerName: toCapital(controller),
       imports: Object.keys(this.imports)
         .map((m) => toCapital(m))

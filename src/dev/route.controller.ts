@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Inject, Post } from '@nestjs/common'
+import { DEV_OPTION } from './constants'
 import { DevService } from './dev.service'
 import { ControllerGenerator } from './generators/controller'
-import { Route, DeleteBody } from './interface'
+import { Route, DeleteBody, DevOption } from './interface'
 
 const getFullPath = (route: Route): string => {
   const path = [route.method]
@@ -12,10 +13,10 @@ const getFullPath = (route: Route): string => {
 
 @Controller('dev/route')
 export class RouteController {
-  constructor(private readonly devService: DevService) {}
+  constructor(private readonly devService: DevService, @Inject(DEV_OPTION) private readonly option: DevOption) {}
 
   get dir(): string {
-    return process.env.DEV_ROUTE_PATH || 'data/routes'
+    return this.option.routePath || 'data/routes'
   }
 
   @Get('/')
@@ -25,7 +26,7 @@ export class RouteController {
 
   @Get('/config')
   getConfig() {
-    return { prefix: process.env.API_PREFIX }
+    return { prefix: this.option.apiPrefix }
   }
 
   @Post('/save')
@@ -42,11 +43,11 @@ export class RouteController {
 
     await this.devService.saveFile(this.devService.resolvePath(this.dir, body.id), body)
 
-    const { DEV_MODULE_PATH } = process.env
-    if (DEV_MODULE_PATH) {
+    const { modulePath, schemaPath } = this.option
+    if (modulePath) {
       routes = await this.getList()
-      const schemas = await this.devService.getJsonFileList(process.env.DEV_SCHEMA_PATH || 'data/schemas')
-      const cg = new ControllerGenerator(routes, schemas, DEV_MODULE_PATH)
+      const schemas = await this.devService.getJsonFileList(schemaPath || 'data/schemas')
+      const cg = new ControllerGenerator(routes, schemas, modulePath, this.option.apiPrefix)
       await cg.generate(body)
     }
 

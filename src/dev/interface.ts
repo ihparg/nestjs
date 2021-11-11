@@ -65,3 +65,14 @@ export type ClassConstructor<T> = {
 }
 
 export type ResponseFunction = <T>(data: T, errors: ValidationError[]) => unknown
+
+export interface DevOption {
+  schemaPath?: string
+  routePath?: string
+  interfacePath?: string
+  typeormEntityPath?: string
+  typeormUnderscore?: boolean
+  mongodbSchemaPath?: string
+  modulePath?: string
+  apiPrefix?: string
+}
