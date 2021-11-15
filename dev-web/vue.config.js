@@ -13,7 +13,7 @@ module.exports = {
   },
   lintOnSave: false,
   // assetsDir: 'dev/public',
-  outputDir: '../dist/public',
+  outputDir: '../dist/dev/public',
   publicPath: '/dev/public',
   css: {
     loaderOptions: {

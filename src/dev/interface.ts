@@ -67,12 +67,48 @@ export type ClassConstructor<T> = {
 export type ResponseFunction = <T>(data: T, errors: ValidationError[]) => unknown
 
 export interface DevOption {
+  /**
+   * Schemas 存储目录，默认值为: data/schemas
+   */
   schemaPath?: string
+
+  /**
+   * Routes 存储目录，默认值为：data/routes
+   */
   routePath?: string
+
+  /**
+   * interface.ts 存储文件地址
+   */
   interfacePath?: string
+
+  /**
+   * typeorm entity 存储目录
+   */
   typeormEntityPath?: string
+
+  /**
+   * 是否转驼峰为下划线
+   */
   typeormUnderscore?: boolean
+
+  /**
+   * mongodb schema 存储目录
+   */
   mongodbSchemaPath?: string
+
+  /**
+   * 模块存储目录
+   */
   modulePath?: string
+
+  /**
+   * api 前缀
+   */
   apiPrefix?: string
+
+  logger?: {
+    debug: (...args: any[]) => void
+    error: (...args: any[]) => void
+  }
 }
