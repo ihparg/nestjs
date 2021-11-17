@@ -5,9 +5,9 @@ import { compile } from 'nunjucks'
 import { getFileName, toCapital } from './utils'
 
 const functionTemplate = `
-async {{functionName}}({{params}}): Promise<{{response}}> {
-  // Write your code here.
-}
+  async {{functionName}}({{params}}): Promise<{{response}}> {
+    // Write your code here.
+  }
 `
 
 export interface Service {
@@ -22,7 +22,8 @@ const appendToFile = async (data, file) => {
   const content = await readFile(file, 'utf-8')
   const lines = []
   let stage = 0
-  content.split('\n').forEach((line) => {
+  const list = content.replace(/[\s|\n]+$/g, '').split('\n')
+  list.forEach((line, i) => {
     lines.push(line)
     if (line.indexOf('import ') < 0 && stage === 0) {
       if (data.imports && content.indexOf(data.dtoFileName) < 0) {
@@ -33,12 +34,13 @@ const appendToFile = async (data, file) => {
       stage = 2
     } else if (stage === 2 && line.indexOf(`async ${data.funcName}`) >= 0) {
       stage = 3
-    } else if (stage === 2 && line === '}') {
+    } else if (stage === 2 && i === list.length - 1) {
       lines.splice(lines.length - 1, 0, data.funcCode)
+      stage = 4
     }
   })
 
-  await writeFile(file, lines.join('\n'))
+  if (stage === 4) await writeFile(file, lines.join('\n'))
 }
 
 const createFile = async (data, file) => {

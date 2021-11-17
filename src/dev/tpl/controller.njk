@@ -2,14 +2,13 @@ import { Controller, {{imports}} } from '@nestjs/common'
 import { ResponseValidator } from '@graphi/nestjs'
 {% for name, service in services -%}
 import { {{name}} } from '{{service.import}}'
-{% endfor %}{% for route in routes -%}
-{% if route.imports %}{{route.imports.replace('[]', '')|safe}}{% endif %}
 {% endfor %}
+{% if route.imports %}{{route.imports.replace('[]', '')|safe}}{% endif %}
 
 @Controller('{{controllerPath}}')
 export class {{controllerName}}Controller {
   constructor({% for name, s in services %}private readonly {{s.name}}: {{name}},{% endfor %}) {}
-  {% for route in routes %}
+
   {% if route.desc %}/** {{route.desc}} */{% endif %}
   @{{route.method}}('{{route.pathname}}')
   {% for k, v in route.responseHeader %}
@@ -28,5 +27,4 @@ export class {{controllerName}}Controller {
     )
     return result
   }
-  {% endfor %}
 }

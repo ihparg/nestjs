@@ -35,6 +35,7 @@ export interface Route {
   refs: Array<string>
   fullPath?: string
   module: string
+  controller: string
   functionName: string
   resolve: string
 }

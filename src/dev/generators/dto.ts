@@ -153,6 +153,8 @@ export class DtoGenerator {
           const r = this.getValidator(prop.items[0], name)
           result = result.concat(r)
           break
+        case 'json':
+          break
         default:
           result.push(`Type(() => ${name})`)
           result.push('ValidateNested()')
@@ -243,12 +245,14 @@ export class DtoGenerator {
 
     this.writeFile(option, overwrite)
 
-    const imps = Object.values(results).filter((s) => !['number', 'string', 'Date', 'any'].includes(s as string))
+    const imps = Object.values(results)
+      .filter((s) => !['number', 'string', 'Date', 'any'].includes(s as string))
+      .map((s) => s.replace('[]', ''))
     results.fileName = `./dto/${getFileName(option.functionName, 'dto')}`
     results.params = this.getFields(route.routeParams.properties, 'Params')
 
     if (imps.length > 0) {
-      results.imports = `import { ${imps.join(',')} } from '${results.fileName}'`
+      results.imports = `import { ${imps.join(', ')} } from '${results.fileName}'`
     }
 
     return results

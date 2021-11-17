@@ -10,10 +10,7 @@
       >
         <div class="title">{{ r.title }}</div>
         <div class="path">
-          <span class="method" :class="{ get: r.method === 'GET' }">
-            {{ r.method }}
-          </span>
-          {{ r.path }}
+          {{ getFullPath(r) }}
         </div>
         <span v-if="r.module" class="module" @click.stop.prevent="moduleClick(r.module)">
           {{ r.module }}
@@ -25,10 +22,12 @@
 
 <script>
 import fuzzysearch from 'fuzzysearch'
+import { getFullPath } from '@/utils/route'
 
 export default {
   props: {
     activeId: String,
+    apiPrefix: String,
     list: Array,
   },
   data() {
@@ -40,7 +39,9 @@ export default {
     filterList() {
       const { filter } = this
       if (filter) {
-        return this.list.filter(d => d.module === filter || fuzzysearch(filter, d.title + d.path))
+        return this.list.filter(
+          d => d.module === filter || fuzzysearch(filter, d.title + this.getFullPath(d)),
+        )
       }
       return this.list
     },
@@ -48,6 +49,9 @@ export default {
   methods: {
     moduleClick(module) {
       this.filter = module
+    },
+    getFullPath(value) {
+      return getFullPath(value, this.apiPrefix)
     },
   },
 }
@@ -58,7 +62,7 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  width: 24rem;
+  width: 20rem;
   height: calc(100vh - 3.5rem);
 
   &::after {

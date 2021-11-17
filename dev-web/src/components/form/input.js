@@ -11,6 +11,7 @@ export default {
     name: String,
     rules: Array,
     type: { type: String, default: 'textbox' },
+    bind: Array,
   },
   inheritAttrs: false,
   setup({ name, rules, defaultValue }) {
@@ -79,6 +80,12 @@ export default {
         deepSet(this.form.data, this.name, v, { forceSet: true })
         if (this.rules) this.validate(v)
         this.$emit('input', v)
+
+        if (this.bind) {
+          this.bind.forEach(name => {
+            this.form.validates[name]()
+          })
+        }
       },
     })
   },

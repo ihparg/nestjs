@@ -7,6 +7,16 @@
     <v-form v-else :key="editable" ref="form" :data="value" :disabled="!editable">
       <div class="form">
         <div style="display: flex;">
+          <v-input
+            name="method"
+            label="Method"
+            required
+            type="select"
+            style="width: 8rem; margin-right: 1rem;"
+            default-value="GET"
+            :options="['GET', 'POST', 'PUT', 'DELETE']"
+          />
+
           <template v-if="editable">
             <div class="api-prefix">{{ apiPrefix }}</div>
 
@@ -16,19 +26,30 @@
               type="autocomplete"
               :suggestions="groups"
               default-value=""
-              style="min-width: 8rem; margin-right: 0.5rem;"
+              style="flex: 1; margin-right: 0.5rem;"
               help="可选"
             />
 
             <div class="api-prefix"></div>
 
             <v-input
+              name="controller"
+              label="Controller"
+              required
+              :bind="['path']"
+              :rules="[rule.required, rule.path]"
+              style="flex: 1; margin-right: 0.5rem;"
+            />
+
+            <div class="api-prefix"></div>
+
+            <v-input
               name="path"
-              label="路径"
+              label="路径1"
               required
               :rules="[rule.required, rule.path, rule.pathExist]"
-              style="flex: 1;"
-              help="格式为 /{controller}/{path:可选}/{method}"
+              style="flex: 2;"
+              help="格式为 /{path:可选}/{method}"
               default-value=""
               @input="pathChange"
             />
@@ -44,17 +65,7 @@
             :suggestions="resolves"
             name="resolve"
             type="autocomplete"
-            style="width: 20rem; margin-left: 1rem;"
-          />
-
-          <v-input
-            name="method"
-            label="Method"
-            required
-            type="select"
-            style="width: 10rem; margin-left: 1rem;"
-            default-value="GET"
-            :options="['GET', 'POST', 'PUT', 'DELETE']"
+            style="flex: 2; margin-left: 1rem;"
           />
         </div>
 
@@ -113,7 +124,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import Rule from '@/utils/rule'
-import { getRouteParamsKeys, getAllRefs } from '@/utils/route'
+import { getRouteParamsKeys, getAllRefs, getFullPath } from '@/utils/route'
 import { fastClone } from '@/utils/clone'
 import fetch from '@/utils/fetch'
 import { registerInput } from '@/components/form'
@@ -139,7 +150,7 @@ export default {
     const existedPath = {}
     this.routes.forEach(r => {
       if (r.module) groups[r.module] = true
-      if (rid !== r.id) existedPath[r.fullPath] = true
+      if (rid !== r.id) existedPath[this.getFullPath(r)] = true
     })
 
     return {
@@ -150,16 +161,17 @@ export default {
       groups: Object.keys(groups),
       rule: Rule({
         pathExist: (value, f, callback) => {
-          const fullPath = `${f.method}:${value}`
-          if (fullPath in this.existedPath) callback(new Error('路径已存在'))
+          const fullPath = this.getFullPath(f)
+
+          if (this.existedPath[fullPath]) callback(new Error('路径已存在'))
           else callback(true)
         },
-        path: { regExp: '^[A-Za-z0-9-_:/]+$', message: '不是一个正确的Url' },
+        path: { regExp: '^[A-Za-z0-9-_/]+$', message: '路径格式不正确' },
       }),
       tabs: [
         {
           requestBody: { title: 'REQUEST BODY' },
-          routeParams: { title: 'ROUTE PARAMS', type: 'route-params' },
+          // routeParams: { title: 'ROUTE PARAMS', type: 'route-params' },
           queryString: { title: 'QUERY STRING' },
           requestHeaders: { title: 'REQUEST HEADERS', allowDash: true },
         },
@@ -199,11 +211,7 @@ export default {
       return `${this.apiPrefix ? this.apiPrefix : ''}${module ? `/${module}` : ''}`
     },
     fullPath() {
-      const { module, path } = this.value
-      const fullPath = [this.apiPrefix]
-      if (module) fullPath.push(module)
-      fullPath.push(path)
-      return fullPath.join('/')
+      return this.getFullPath(this.value)
     },
   },
   watch: {
@@ -269,6 +277,9 @@ export default {
         newProps[key] = properties[key] || { type: 'string' }
       })
       this.value.routeParams = { type: 'object', properties: newProps }
+    },
+    getFullPath(value) {
+      return getFullPath(value, this.apiPrefix)
     },
     handleRemove() {
       this.sending = true

@@ -4,7 +4,7 @@ module.exports = {
   devServer: {
     port: 3001,
     proxy: {
-      '^/dev': {
+      '^/dev/[a-o|q-z]*': {
         target: 'http://localhost:3009',
         ws: true,
         changeOrigin: true,

@@ -11,7 +11,7 @@ import { DevModule } from './dev'
       typeormUnderscore: true,
       mongodbSchemaPath: 'test/data/models',
       modulePath: 'test/data/modules',
-      apiPrefix: '/api',
+      //apiPrefix: 'api',
     }),
   ],
 })

@@ -7,6 +7,7 @@ import { Route, DeleteBody, DevOption } from './interface'
 const getFullPath = (route: Route): string => {
   const path = [route.method]
   if (route.module) path.push(route.module)
+  path.push(route.controller)
   path.push(route.path)
   return path.join('/')
 }

@@ -43,7 +43,7 @@ export class ControllerGenerator {
     return result
   }
 
-  private splitPath({ path, method, module }) {
+  private splitPath({ path, method, module, controller }) {
     const splitedPath = path.replace(/^\/|\/$/g, '').split('/')
     const prefix = path.indexOf(':') >= 0 ? method.toLowerCase() : ''
 
@@ -57,7 +57,7 @@ export class ControllerGenerator {
 
     return {
       module,
-      controller: splitedPath.shift(),
+      controller,
       pathname: '/' + splitedPath.join('/'),
       functionName: prefix + fn(splitedPath, ''),
     }
@@ -83,44 +83,11 @@ export class ControllerGenerator {
     await writeFileFix(path, content)
   }
 
-  async generate(src: Route) {
-    const { module, controller } = this.splitPath(src)
-
-    const routes = []
-    this.imports = {}
-    this.routes.forEach(async (r) => {
-      if (r.module !== module || r.path.split('/')[0] !== controller) return
-
-      const sp = this.splitPath(r)
-      const dtos = this.dtoGenerator().generate(r, sp, src.id === r.id)
-      const route = {
-        desc: r.title,
-        method: toCapital(r.method.toLowerCase()),
-        responseHeader: this.handleResponseHeader(r.responseHeaders),
-        service: this.resolveService(r.resolve),
-        ...dtos,
-        ...sp,
-      }
-      routes.push(route)
-      this.imports[r.method.toLowerCase()] = true
-      if (route.BodyDto) this.imports['Body'] = true
-      if (route.QueryDto) this.imports['Query'] = true
-      if (route.params) this.imports['Param'] = true
-
-      if (r.id === src.id) {
-        await resolveService({
-          functionName: route.service.method,
-          service: r.resolve,
-          dtos,
-          dir: join(this.dir, module, controller),
-          params: route.params,
-        })
-      }
-    })
-
+  private async createFile(route: any, controller: string, file: string) {
+    const { module } = route
     const njk = await readFile(join(__dirname, '../tpl/controller.njk'), 'utf-8')
     const options = {
-      routes,
+      route,
       services: this.services,
       controllerPath: (this.apiPrefix || '') + '/' + (module ? module + '/' : '') + controller,
       controllerName: toCapital(controller),
@@ -130,11 +97,94 @@ export class ControllerGenerator {
     }
 
     const content = compile(njk).render(options)
+
+    await writeFileFix(file, content)
+  }
+
+  private getCommonImports(raw: string) {
+    const match = /{(.*)}/.exec(raw)
+    if (match == null) return raw
+    const imports = Object.keys(this.imports)
+      .map((s) => toCapital(s))
+      .concat(match[1].split(',').map((s) => toCapital(s.trim())))
+    return `import { ${Array.from(new Set(imports)).sort().join(', ')} } from '@nestjs/common'`
+  }
+
+  private async appendToFile(route: any, controller: string, file: string) {
+    const content = await readFile(file, 'utf-8')
+    const lines = []
+    let stage = 0
+    const list = content.replace(/[\s|\n]+$/g, '').split('\n')
+    list.forEach((line, i) => {
+      if (line.indexOf("from '@nestjs/common'") > 0 && stage === 0) {
+        line = this.getCommonImports(line)
+      }
+      lines.push(line)
+      if (line.indexOf('import ') < 0 && stage === 0) {
+        if (route.imports && content.indexOf(route.dtoFileName) < 0) {
+          lines.splice(lines.length - 1, 0, route.imports)
+        }
+        stage = 1
+      } else if (line.indexOf(`class ${toCapital(controller)}Controller`) >= 0 && stage === 1) {
+        stage = 2
+      } else if (stage === 2 && line.indexOf(`async ${route.functionName}`) >= 0) {
+        stage = 3
+      } else if (stage === 2 && i === list.length - 1) {
+        lines.splice(lines.length - 1, 0, route.methodContent)
+        stage = 4
+      }
+    })
+
+    if (stage === 4) await writeFileFix(file, lines.join('\n'))
+  }
+
+  private async getMethodContent(route: any): Promise<string> {
+    const njk = await readFile(join(__dirname, '../tpl/method.njk'), 'utf-8')
+    return compile(njk).render({ route })
+  }
+
+  async generate(src: Route) {
+    const { module, controller } = this.splitPath(src)
+
+    this.imports = {}
+
+    const sp = this.splitPath(src)
+    const dtos = this.dtoGenerator().generate(src, sp, src.id === src.id)
+    const route = {
+      methodContent: undefined,
+      desc: src.title,
+      method: toCapital(src.method.toLowerCase()),
+      responseHeader: this.handleResponseHeader(src.responseHeaders),
+      service: this.resolveService(src.resolve),
+      ...dtos,
+      ...sp,
+    }
+    this.imports[src.method.toLowerCase()] = true
+    if (route.BodyDto) this.imports['Body'] = true
+    if (route.QueryDto) this.imports['Query'] = true
+    if (route.params) this.imports['Param'] = true
+
+    if (src.id === src.id) {
+      await resolveService({
+        functionName: route.service.method,
+        service: src.resolve,
+        dtos,
+        dir: join(this.dir, module, controller),
+        params: route.params,
+      })
+    }
+
+    route.methodContent = await this.getMethodContent(route)
+
     const fileName = getFileName(controller, 'controller')
     // 完整路径
-    const path = join(this.dir, module, controller, fileName + '.ts')
+    const file = join(this.dir, module, controller, fileName + '.ts')
 
-    await writeFileFix(path, content)
+    if (existsSync(file)) {
+      await this.appendToFile(route, controller, file)
+    } else {
+      await this.createFile(route, controller, file)
+    }
 
     this.createModule(join(this.dir, module, controller, getFileName(controller, 'module') + '.ts'), controller)
   }

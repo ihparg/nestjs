@@ -54,3 +54,12 @@ export const getAllRefs = route => {
 
   return Object.keys(refs)
 }
+
+export const getFullPath = (value, apiPrefix) => {
+  const { method, module, controller, path } = value
+  const fullPath = [apiPrefix]
+  if (module) fullPath.push(module)
+  fullPath.push(controller)
+  fullPath.push(path)
+  return `${method}:${fullPath.join('/')}`
+}

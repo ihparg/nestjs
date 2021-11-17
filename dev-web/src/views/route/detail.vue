@@ -1,7 +1,7 @@
 <template>
   <v-loading v-if="!isReady" />
   <template v-else>
-    <List :list="routes" :active-id="rid" />
+    <List :list="routes" :active-id="rid" :api-prefix="routeConfig.prefix" />
     <Content
       :key="rid"
       v-model:editable="editable"
@@ -14,7 +14,7 @@
     <v-fab-add
       v-if="!editable"
       :to="`/route/0`"
-      style="position: fixed; left: 23rem; bottom: 1rem; top: auto;"
+      style="position: fixed; left: 19rem; bottom: 1rem; top: auto;"
     />
   </template>
 </template>
