@@ -1,0 +1,28 @@
+{% macro createObject(fields) %} {
+  {% for field in fields %}{{createField(field)}}{% endfor %}
+}{% endmacro %}
+{% macro createField(field) %}
+  {%- if (field.desc) %}/** {{field.desc}} */{% endif %}
+  {% if (field.sqlType) %}@Column({{field.sqlType|safe}}){% endif %}
+  {% if (field.refType) %}{{field.refType|safe}}{% endif %}
+  {% if (field.name) %}{{field.name}}{%if not(field.required)%}?{% endif %}: {% endif %}
+  {%- if (field.type === 'object' or field.type === 'map') -%}
+    {{createObject(field.fields)}}
+  {%- elif (field.type === 'array') -%}
+    {{createField(field.fields[0])}}[]
+  {%- else -%}
+    {% if (field.objType) %}{{createObject(field.objType)}}{% elif (field.jsType) %}{{field.jsType|safe}}{% else %}{{field.type}}{% endif -%}
+  {%- endif -%}
+{% endmacro %}
+/** 由 @graphi/nestjs/model.generator.ts 生成，不要手动修改 */
+import { Model, Table, Column{% if (relatedTypes) %}, {{relatedTypes}}{% endif %} } from 'sequelize-typescript'
+{% for imp in imports -%}
+{{imp|safe}}
+{% endfor %}
+
+@Table({ tableName: '{{tableName}}', freezeTableName: true })
+export class {{name}} extends Model {
+  {% for field in fields %}
+  {{createField(field)}}
+  {% endfor %}
+}

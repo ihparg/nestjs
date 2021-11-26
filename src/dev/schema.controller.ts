@@ -6,8 +6,7 @@ import { generateInterface } from './generators/interface'
 import { TypeOrmGenerator } from './generators/typeorm'
 import { MongoGenerator } from './generators/mongo'
 import { DEV_OPTION } from './constants'
-
-const isERModel = (type: string): boolean => ['mysql', 'postgres', 'sqlite', 'typeorm'].includes(type)
+import { SequelizeGenerator } from './generators/sequelize'
 
 @Controller('dev/schema')
 export class SchemaController {
@@ -28,15 +27,17 @@ export class SchemaController {
     if (!body.id) body.id = this.devService.nextUid()
     await this.devService.saveFile(this.devService.resolvePath(this.dir, body.id), body)
 
-    const { interfacePath, typeormEntityPath, mongodbSchemaPath } = this.option
+    const { interfacePath, typeormEntityPath, sequelizeEntityPath, mongodbSchemaPath } = this.option
 
     const schemas = await this.getList()
     if (interfacePath) {
       await generateInterface(schemas, join(process.cwd(), interfacePath))
     }
 
-    if (typeormEntityPath && isERModel(body.tag)) {
-      await new TypeOrmGenerator(body, typeormEntityPath, schemas, this.option.typeormUnderscore).generate()
+    if (typeormEntityPath && body.tag === 'typeorm') {
+      await new TypeOrmGenerator(body, typeormEntityPath, schemas, this.option.ormUnderscore).generate()
+    } else if (sequelizeEntityPath && body.tag === 'sequelize') {
+      await new SequelizeGenerator(body, typeormEntityPath, schemas, this.option.ormUnderscore).generate()
     } else if (mongodbSchemaPath && body.tag === 'mongodb') {
       await new MongoGenerator(body, mongodbSchemaPath, schemas).generate()
     }

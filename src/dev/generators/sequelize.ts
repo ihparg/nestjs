@@ -12,7 +12,7 @@ interface FieldType {
   refType?: string
 }
 
-export class TypeOrmGenerator {
+export class SequelizeGenerator {
   private relatedTypes: { [key: string]: boolean }
   private relatedEntities: { [key: string]: string }
   private name: string
@@ -34,7 +34,7 @@ export class TypeOrmGenerator {
   }
 
   async generate() {
-    const njk = await readFile(join(__dirname, '../tpl/typeorm.njk'), 'utf-8')
+    const njk = await readFile(join(__dirname, '../tpl/sequelize.njk'), 'utf-8')
     const props = this.schema.content.properties
     const options = {
       name: this.className,
@@ -89,45 +89,41 @@ export class TypeOrmGenerator {
     let type: FieldType
     switch (prop.type) {
       case 'uuid':
-        type = { jsType: 'string', sqlType: { type: 'uuid' } }
+        type = { jsType: 'string', sqlType: { type: 'DataType.UUID' } }
         break
       case 'integer':
-        type = { jsType: 'number', sqlType: { type: 'int' } }
+        type = { jsType: 'number', sqlType: { type: 'DataType.INTEGER' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       // 不建议使用double和float，使用decimal类型
       case 'double':
       case 'float':
       case 'decimal':
-        type = { jsType: 'number', sqlType: { type: 'decimal' } }
+        type = { jsType: 'number', sqlType: { type: 'DataType.DECIMAL' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'datetime':
-        type = { jsType: 'Date', sqlType: { type: 'datetime' } }
+        type = { jsType: 'Date', sqlType: { type: 'DataType.DATE' } }
         break
       case 'biginteger':
-        type = { jsType: 'number', sqlType: { type: 'bigint' } }
+        type = { jsType: 'number', sqlType: { type: 'DataType.BIGINT' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'text':
-        type = { jsType: 'string', sqlType: { type: 'text' } }
+        type = { jsType: 'string', sqlType: { type: 'DataType.TEXT' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'object':
       case 'map':
-        type = { sqlType: { type: 'simple-json' } }
-        break
       case 'array':
-        type = { sqlType: { type: 'simple-array' } }
-        break
       case 'json':
-        type = { jsType: 'any', sqlType: { type: 'json' } }
+        type = { jsType: 'any', sqlType: { type: 'DataType.JSON' } }
         break
       default:
-        type = { jsType: prop.type, sqlType: { type: 'varchar' } }
+        type = { jsType: prop.type, sqlType: { type: 'DataType.STRING' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
     }
-    if (this.underscore) type.sqlType.name = toUnderscore(name)
+    if (this.underscore) type.sqlType.field = toUnderscore(name)
     type.sqlType = JSON.stringify(type.sqlType)
     return type
   }
@@ -156,7 +152,7 @@ export class TypeOrmGenerator {
     const relatedField = { name: null, prop: null, isMany: false }
 
     // 如果关联的没有标记为数据表，直接返回类型
-    if (target.tag !== 'typeorm') {
+    if (target.tag !== 'sequelize') {
       return {
         ...getFieldInterface(target.content, name),
         ...this.getType(target.content, name),
@@ -174,12 +170,13 @@ export class TypeOrmGenerator {
         relatedField.isMany = true
       }
     })
-    let refType = ''
+    const refType = ''
+    /*
     let isJoinColumn = false
     if (relatedField.name) {
       if (isMany) {
         refType = relatedField.isMany
-          ? `@ManyToMany(() => ${refClassName})\n${this.getJoinTable(refClassName, this.className)}`
+          ? `@HasMany(() => ${refClassName}, ${this.convertFieldName(refClassName)})`
           : `@OneToMany(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
       } else {
         refType = `@ManyToOne(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
@@ -191,16 +188,16 @@ export class TypeOrmGenerator {
       isJoinColumn = true
     }
     if (isJoinColumn) refType += `\n@JoinColumn({ name: '${this.convertFieldName(name + 'Id')}' })`
+    */
     const jsType = isMany ? `${refClassName}[]` : refClassName
 
     // imports 用
     if (refClassName !== this.className) {
       this.relatedEntities[ref] = refClassName
     }
-    const rt = ['ManyToMany', 'ManyToOne', 'OneToMany', 'OneToOne'].find((s) => refType.indexOf(s) > 0)
+    const rt = ['HasMany', 'ManyToOne', 'OneToMany', 'OneToOne'].find((s) => refType.indexOf(s) > 0)
     if (rt) this.relatedTypes[rt] = true
-    if (isJoinColumn) this.relatedTypes.JoinColumn = true
-    if (refType.indexOf('JoinTable') > 0) this.relatedTypes.JoinTable = true
+    //if (isJoinColumn) this.relatedTypes.JoinColumn = true
 
     return {
       name,
@@ -208,7 +205,7 @@ export class TypeOrmGenerator {
       refType,
       desc: prop.description,
       required: prop.required,
-      isJoinColumn,
+      //isJoinColumn,
     }
   }
 }

@@ -89,9 +89,14 @@ export interface DevOption {
   typeormEntityPath?: string
 
   /**
+   * sequelize entity 存储目录
+   */
+  sequelizeEntityPath?: string
+
+  /**
    * 是否转驼峰为下划线
    */
-  typeormUnderscore?: boolean
+  ormUnderscore?: boolean
 
   /**
    * mongodb schema 存储目录

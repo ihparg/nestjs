@@ -115,7 +115,11 @@ export default {
   },
   emits: ['update:editable'],
   data() {
-    const groups = {}
+    const groups = {
+      mongodb: true,
+      typeorm: true,
+      sequelize: true,
+    }
     Object.values(this.schemas).forEach(s => {
       if (s.tag) groups[s.tag] = true
     })
