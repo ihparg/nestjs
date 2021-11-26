@@ -37,7 +37,7 @@ export class SchemaController {
     if (typeormEntityPath && body.tag === 'typeorm') {
       await new TypeOrmGenerator(body, typeormEntityPath, schemas, this.option.ormUnderscore).generate()
     } else if (sequelizeEntityPath && body.tag === 'sequelize') {
-      await new SequelizeGenerator(body, typeormEntityPath, schemas, this.option.ormUnderscore).generate()
+      await new SequelizeGenerator(body, sequelizeEntityPath, schemas, this.option.ormUnderscore).generate()
     } else if (mongodbSchemaPath && body.tag === 'mongodb') {
       await new MongoGenerator(body, mongodbSchemaPath, schemas).generate()
     }

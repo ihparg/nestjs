@@ -84,6 +84,11 @@ export class SequelizeGenerator {
     return fields
   }
 
+  private stringify(field: { [key: string]: string }) {
+    const { type, ...args } = field
+    return '{ type: ' + type + ',' + JSON.stringify(args).substr(1)
+  }
+
   private getType(prop: Property, name: string) {
     if (!prop) return undefined
     let type: FieldType
@@ -124,7 +129,8 @@ export class SequelizeGenerator {
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
     }
     if (this.underscore) type.sqlType.field = toUnderscore(name)
-    type.sqlType = JSON.stringify(type.sqlType)
+    //type.sqlType = JSON.stringify(type.sqlType)
+    type.sqlType = this.stringify(type.sqlType)
     return type
   }
 

@@ -15,7 +15,7 @@
   {%- endif -%}
 {% endmacro %}
 /** 由 @graphi/nestjs/model.generator.ts 生成，不要手动修改 */
-import { Model, Table, Column{% if (relatedTypes) %}, {{relatedTypes}}{% endif %} } from 'sequelize-typescript'
+import { Model, DataType, Table, Column{% if (relatedTypes) %}, {{relatedTypes}}{% endif %} } from 'sequelize-typescript'
 {% for imp in imports -%}
 {{imp|safe}}
 {% endfor %}
