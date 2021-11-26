@@ -45,7 +45,7 @@
 
             <v-input
               name="path"
-              label="路径1"
+              label="路径"
               required
               :rules="[rule.required, rule.path, rule.pathExist]"
               style="flex: 2;"
@@ -211,7 +211,7 @@ export default {
       return `${this.apiPrefix ? this.apiPrefix : ''}${module ? `/${module}` : ''}`
     },
     fullPath() {
-      return this.getFullPath(this.value)
+      return this.getFullPath(this.value).split(':')[1]
     },
   },
   watch: {
@@ -323,7 +323,7 @@ export default {
 }
 
 .full-path {
-  flex: 1;
+  flex: 2;
   margin-bottom: 1rem;
 
   .label {

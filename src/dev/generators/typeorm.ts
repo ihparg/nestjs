@@ -104,6 +104,9 @@ export class TypeOrmGenerator {
         type = { jsType: 'number', sqlType: { type: 'decimal' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
+      case 'datetime':
+        type = { jsType: 'Date', sqlType: { type: 'datetime' } }
+        break
       case 'biginteger':
         type = { jsType: 'number', sqlType: { type: 'bigint' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
