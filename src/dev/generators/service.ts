@@ -7,6 +7,7 @@ import { getFileName, toCapital } from './utils'
 const functionTemplate = `
   async {{functionName}}({{params}}): Promise<{{response}}> {
     // Write your code here.
+    return null
   }
 `
 
