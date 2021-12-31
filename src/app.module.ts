@@ -12,6 +12,7 @@ import { DevModule } from './dev'
       ormUnderscore: true,
       mongodbSchemaPath: 'test/data/models',
       modulePath: 'test/data/modules',
+      webApiPath: 'test/data/apis',
       //apiPrefix: 'api',
     }),
   ],

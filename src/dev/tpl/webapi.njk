@@ -1,0 +1,13 @@
+import fetch from '@utils/fetch'
+
+{% for name, dto in dtos %}
+{% if dto.desc %}/** {{dto.desc}} */{% endif %}
+export interface {{name}} {
+  {% for field, prop in dto.fields %}
+  {% if prop.desc %}/** {{prop.desc}} */{% endif %}
+  {{field}}{%if not(prop.required)%}?{% endif %}: {{prop.type|safe}}
+  {% endfor %}
+}
+{% endfor %}
+
+export default (data: {{request}}): Promise<{{response}}> => fetch.{{method}}('{{url}}', data)

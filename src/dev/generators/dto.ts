@@ -31,15 +31,14 @@ interface Result {
   ResponseDto?: string
   fileName?: string
   imports?: string
-  params?: {
-    [key: string]: Field
-  }
+  params?: Record<string, Field>
+  dtos?: Record<string, Dto>
 }
 
 export class DtoGenerator {
   private schemas: { [key: string]: Property }
   private tempRootName: string
-  private dtos: { [key: string]: Dto }
+  private dtos: Record<string, Dto>
   private usedValidators: { [key: string]: boolean }
   private dir: string
 
@@ -254,6 +253,8 @@ export class DtoGenerator {
     if (imps.length > 0) {
       results.imports = `import { ${imps.join(', ')} } from '${results.fileName}'`
     }
+
+    results.dtos = this.dtos
 
     return results
   }

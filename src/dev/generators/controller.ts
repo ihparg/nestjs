@@ -7,6 +7,8 @@ import { resolvePath } from '../resolvable'
 import { DtoGenerator } from './dto'
 import { getFileName, toCapital, writeFileFix, getInstanceName } from './utils'
 import { resolveService } from './service'
+import { RouteResult } from './interface'
+import createWebApi from './webapi'
 
 export class ControllerGenerator {
   private routes: Array<Route>
@@ -63,7 +65,7 @@ export class ControllerGenerator {
     }
   }
 
-  private handleResponseHeader(header: Property) {
+  private handleResponseHeader(header: Property): Record<string, any> {
     if (!header || !header.properties) return null
     const obj = {}
     Object.keys(header.properties).forEach((key) => {
@@ -143,14 +145,14 @@ export class ControllerGenerator {
     return compile(njk).render({ route })
   }
 
-  async generate(src: Route) {
+  async generate(src: Route, webApiPath: string) {
     const { module, controller } = this.splitPath(src)
 
     this.imports = {}
 
     const sp = this.splitPath(src)
-    const dtos = this.dtoGenerator().generate(src, sp, src.id === src.id)
-    const route = {
+    const dtos = this.dtoGenerator().generate(src, sp, true)
+    const route: RouteResult = {
       methodContent: undefined,
       desc: src.title,
       method: toCapital(src.method.toLowerCase()),
@@ -164,15 +166,13 @@ export class ControllerGenerator {
     if (route.QueryDto) this.imports['Query'] = true
     if (route.params) this.imports['Param'] = true
 
-    if (src.id === src.id) {
-      await resolveService({
-        functionName: route.service.method,
-        service: src.resolve,
-        dtos,
-        dir: join(this.dir, module, controller),
-        params: route.params,
-      })
-    }
+    await resolveService({
+      functionName: route.service.method,
+      service: src.resolve,
+      dtos,
+      dir: join(this.dir, module, controller),
+      params: route.params,
+    })
 
     route.methodContent = await this.getMethodContent(route)
 
@@ -187,5 +187,8 @@ export class ControllerGenerator {
     }
 
     this.createModule(join(this.dir, module, controller, getFileName(controller, 'module') + '.ts'), controller)
+
+    if (webApiPath)
+      await createWebApi(route, join(webApiPath, module, controller, getFileName(route.functionName) + '.ts'))
   }
 }

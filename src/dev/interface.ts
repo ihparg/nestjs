@@ -84,6 +84,11 @@ export interface DevOption {
   interfacePath?: string
 
   /**
+   * 前端接口文件目录
+   */
+  webApiPath?: string
+
+  /**
    * typeorm entity 存储目录
    */
   typeormEntityPath?: string

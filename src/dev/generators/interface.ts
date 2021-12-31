@@ -89,3 +89,24 @@ export const generateInterface = async (schemas: Array<Schema>, filePath: string
   const content = tpl.render({ schemas: list })
   await writeFileFix(filePath, content)
 }
+
+export interface RouteResult {
+  methodContent: string
+  desc: string
+  method: string
+  responseHeader: Record<string, any>
+  service: {
+    name: string
+    method: string
+    import: string
+  }
+  module: string
+  controller: string
+  pathname: string
+  functionName: string
+  BodyDto?: string
+  QueryDto?: string
+  ResponseDto?: string
+  params?: Record<string, any>
+  dtos?: Record<string, any>
+}
