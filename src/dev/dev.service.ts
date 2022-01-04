@@ -1,15 +1,17 @@
 import { join } from 'path'
 import { customAlphabet } from 'nanoid'
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { readdir, readFile, writeFile, unlink } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
-import { UidFunction } from './interface'
+import { UidFunction, DevOption } from './interface'
+import { Swagger } from './swagger'
+import { DEV_OPTION } from './constants'
 
 @Injectable()
 export class DevService {
   nextUid: UidFunction
 
-  constructor() {
+  constructor(@Inject(DEV_OPTION) private readonly option: DevOption) {
     this.nextUid = customAlphabet('1234567890abcdef', 10)
   }
 
@@ -40,5 +42,13 @@ export class DevService {
 
   async deleteFile(path: string) {
     await unlink(path)
+  }
+
+  async getSwagger() {
+    const { schemaPath, routePath, apiPrefix } = this.option
+    const schemas = await this.getJsonFileList(schemaPath || 'data/schemas')
+    const routes = await this.getJsonFileList(routePath || 'data/routes')
+
+    return new Swagger(schemas, routes, apiPrefix).getDocument()
   }
 }

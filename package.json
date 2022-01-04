@@ -1,6 +1,6 @@
 {
   "name": "@graphi/nestjs",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "",
   "author": "lobos841@gmail.com",
   "license": "MIT",
@@ -56,6 +56,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.1.0",
     "onchange": "^7.1.0",
+    "openapi-types": "^10.0.0",
     "prettier": "^2.3.2",
     "sequelize": "^6.12.0-alpha.1",
     "sequelize-typescript": "^2.1.1",

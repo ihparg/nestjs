@@ -27,4 +27,9 @@ export class DevController {
   getStaticFile(@Req() req: any): Promise<string> {
     return this.devService.getStaticFile(req.path.replace('dev/', ''))
   }
+
+  @Get('/swagger')
+  getSwagger() {
+    return this.devService.getSwagger()
+  }
 }
