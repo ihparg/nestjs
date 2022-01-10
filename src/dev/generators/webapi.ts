@@ -11,7 +11,7 @@ export default async (route: RouteResult, path: string) => {
     response: route.ResponseDto,
     request: route.BodyDto || route.QueryDto,
     method: route.method.toLowerCase(),
-    url: route.pathname,
+    url: route.fullPath,
   })
 
   await writeFileFix(path, content)

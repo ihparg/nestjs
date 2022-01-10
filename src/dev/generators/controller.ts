@@ -9,6 +9,7 @@ import { getFileName, toCapital, writeFileFix, getInstanceName } from './utils'
 import { resolveService } from './service'
 import { RouteResult } from './interface'
 import createWebApi from './webapi'
+import { getFullPath } from '../utils'
 
 export class ControllerGenerator {
   private routes: Array<Route>
@@ -158,6 +159,7 @@ export class ControllerGenerator {
       method: toCapital(src.method.toLowerCase()),
       responseHeader: this.handleResponseHeader(src.responseHeaders),
       service: this.resolveService(src.resolve),
+      fullPath: getFullPath(src, this.apiPrefix),
       ...dtos,
       ...sp,
     }

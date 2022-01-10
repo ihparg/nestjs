@@ -22,29 +22,36 @@ export default {
     headStyle: Object,
   },
   data() {
+    const tabs = this.$slots
+      .default()[0]
+      .children.map(c => c.props)
+      .filter(c => c.avariable)
+
+    const activeId = tabs[0] ? tabs[0].id : this.active
+
     return {
-      activeId: this.active,
-      tabs: [],
+      activeId,
     }
   },
+  computed: {
+    tabs() {
+      return this.$slots
+        .default()[0]
+        .children.map(c => c.props)
+        .filter(c => c.avariable)
+    },
+  },
   methods: {
-    addTab(tab) {
-      this.tabs.push(tab)
-      if (this.active) {
-        tab.activeId = this.active
-      } else if (this.tabs.length === 1) {
-        tab.activeId = tab.id
-        this.activeId = tab.id
-      }
-    },
-    removeTab(tab) {
-      this.tabs = this.tabs.filter(t => t !== tab)
-    },
     tabActive(id) {
       this.activeId = id
       this.tabs.forEach(t => {
         t.activeId = id
       })
+    },
+    refreshActive(id) {
+      if (id === this.activeId) {
+        this.activeId = this.tabs[0].id
+      }
     },
   },
 }

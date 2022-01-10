@@ -5,8 +5,6 @@
 </template>
 
 <script>
-import { nextUid } from '@/utils/uid'
-
 export default {
   props: {
     avariable: {
@@ -15,7 +13,6 @@ export default {
     },
     id: {
       type: String,
-      default: () => nextUid(),
     },
     title: String,
   },
@@ -26,17 +23,11 @@ export default {
   },
   computed: {
     show() {
-      return this.activeId === this.id
+      return this.$parent.activeId === this.id
     },
   },
-  watch: {
-    avariable(val) {
-      if (val) this.$parent.addTab(this)
-      else this.$parent.removeTab(this)
-    },
-  },
-  created() {
-    if (this.avariable) this.$parent.addTab(this)
+  unmounted() {
+    this.$parent.refreshActive(this.id)
   },
 }
 </script>

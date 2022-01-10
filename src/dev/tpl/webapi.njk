@@ -1,4 +1,4 @@
-import fetch from '@utils/fetch'
+import fetch from '@/utils/fetch'
 
 {% for name, dto in dtos %}
 {% if dto.desc %}/** {{dto.desc}} */{% endif %}
@@ -10,4 +10,8 @@ export interface {{name}} {
 }
 {% endfor %}
 
+{% if request %}
 export default (data: {{request}}): Promise<{{response}}> => fetch.{{method}}('{{url}}', data)
+{% else %}
+export default (): Promise<{{response}}> => fetch.{{method}}('{{url}}')
+{% endif %}

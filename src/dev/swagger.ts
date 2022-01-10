@@ -1,6 +1,7 @@
 import { OpenAPIV3 } from 'openapi-types'
 import { flattenSchemas } from './generators/schema'
 import { Properties, Property, Route, Schema } from './interface'
+import { getFullPath } from './utils'
 
 export class Swagger {
   private schemas: { [key: string]: Property }
@@ -12,12 +13,7 @@ export class Swagger {
   }
 
   private getPath(route: Route) {
-    const { module, controller, path } = route
-    const fullPath = [this.apiPrefix || '']
-    if (module) fullPath.push(module)
-    fullPath.push(controller)
-    fullPath.push(path)
-    return fullPath.join('/')
+    return getFullPath(route, this.apiPrefix)
   }
 
   getRef(prop: Property) {

@@ -74,6 +74,7 @@
         <v-tabs v-for="(tab, i) in tabs" :key="i" style="margin-bottom: 1rem;">
           <v-tab
             v-for="(opt, name) in tab"
+            :id="name"
             :key="name"
             :title="`${opt.title}(${propertiesLength[name]})`"
             :avariable="editable || propertiesLength[name] > 0"
@@ -168,18 +169,6 @@ export default {
         },
         path: { regExp: '^[A-Za-z0-9-_/]+$', message: '路径格式不正确' },
       }),
-      tabs: [
-        {
-          requestBody: { title: 'REQUEST BODY' },
-          // routeParams: { title: 'ROUTE PARAMS', type: 'route-params' },
-          queryString: { title: 'QUERY STRING' },
-          requestHeaders: { title: 'REQUEST HEADERS', allowDash: true },
-        },
-        {
-          responseBody: { title: 'RESPONSE BODY' },
-          responseHeaders: { title: 'RESPONSE HEADERS', allowDash: true },
-        },
-      ],
       value: fastClone(this.route),
     }
   },
@@ -212,6 +201,27 @@ export default {
     },
     fullPath() {
       return this.getFullPath(this.value).split(':')[1]
+    },
+    tabs() {
+      const tabs = {
+        request: {
+          requestBody: { title: 'REQUEST BODY' },
+          queryString: { title: 'QUERY STRING' },
+          requestHeaders: { title: 'REQUEST HEADERS', allowDash: true },
+        },
+        response: {
+          responseBody: { title: 'RESPONSE BODY' },
+          responseHeaders: { title: 'RESPONSE HEADERS', allowDash: true },
+        },
+      }
+
+      if (!this.value.method || this.value.method === 'GET') {
+        delete tabs.request.requestBody
+      } else {
+        delete tabs.request.queryString
+      }
+
+      return tabs
     },
   },
   watch: {

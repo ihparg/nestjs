@@ -118,11 +118,43 @@ export class DtoGenerator {
     }
   }
 
+  getArrayValidatorType(prop: Property, name: string): string {
+    switch (prop.type) {
+      case 'integer':
+      case 'biginteger':
+      case 'decimal':
+      case 'double':
+        return 'Type(() => Number)'
+      case 'string':
+      case 'uuid':
+      case 'text':
+        return 'Type(() => String)'
+      case 'datetime':
+        return 'Type(() => Date)'
+      case 'boolean':
+        return 'Type(() => Boolean)'
+      case 'array':
+        return this.getArrayValidatorType(prop.items[0], name)
+      case 'json':
+        return ''
+      case 'map':
+        return `Type(() => Object)`
+      case 'ref':
+        return this.getArrayValidatorType(this.getRef(prop), name)
+      default:
+        return `Type(() => ${name})`
+    }
+  }
+
   getValidator(prop: Property, name: string): string[] {
-    let result = []
+    const result = []
 
     const setResult = (k: string, f: string) => {
       if (prop[k]) result.push(`${f}(${prop[k]})`)
+    }
+
+    if (prop.circleRef) {
+      name = this.getDtoName(prop)
     }
 
     const setType = () => {
@@ -149,11 +181,19 @@ export class DtoGenerator {
           result.push('Type(() => Boolean)')
           break
         case 'array':
-          const r = this.getValidator(prop.items[0], name)
-          result = result.concat(r)
+          result.push('IsArray()')
+          const r = this.getArrayValidatorType(prop.items[0], name)
+          if (r) result.push(r)
           break
         case 'json':
           break
+        case 'map':
+          result.push(`Type(() => Object)`)
+          break
+        case 'ref':
+          const ref = this.getValidator(this.getRef(prop), name)
+          console.log(ref)
+          return ref
         default:
           result.push(`Type(() => ${name})`)
           result.push('ValidateNested()')

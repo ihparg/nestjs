@@ -103,6 +103,7 @@ export interface RouteResult {
   module: string
   controller: string
   pathname: string
+  fullPath: string
   functionName: string
   BodyDto?: string
   QueryDto?: string
