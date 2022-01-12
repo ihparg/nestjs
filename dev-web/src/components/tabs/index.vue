@@ -49,7 +49,7 @@ export default {
       })
     },
     refreshActive(id) {
-      if (id === this.activeId) {
+      if (id === this.activeId && this.tabs.length > 0) {
         this.activeId = this.tabs[0].id
       }
     },

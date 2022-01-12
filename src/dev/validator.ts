@@ -1,8 +1,9 @@
+import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common'
 import { iterate } from 'iterare'
 import { plainToClass } from 'class-transformer'
-import { validate } from 'class-validator'
-import { ValidationError } from '@nestjs/common'
-import { ClassConstructor, ResponseFunction } from './interface'
+import { validate, ValidationError } from 'class-validator'
+import { ClassConstructor } from './interface'
+import { ResponseValidatorException } from './exception'
 
 function prependConstraintsWithParentProp(parentPath: string, error: ValidationError): ValidationError {
   const constraints = {}
@@ -40,23 +41,6 @@ export function flattenValidationErrors(validationErrors: ValidationError[]): st
     .toArray()
 }
 
-interface Result<T> {
-  code: number
-  data: T
-  validateErrors?: string[]
-}
-
-let responseWrap: ResponseFunction = function <T>(data: T, errors: ValidationError[]): Result<T> {
-  const validateErrors = flattenValidationErrors(errors)
-  const result: Result<T> = { code: 200, data }
-  if (validateErrors.length > 0) result.validateErrors = validateErrors
-  return result
-}
-
-export function customResponse(fn: ResponseFunction) {
-  responseWrap = fn
-}
-
 export function ResponseValidator<T>(cls: ClassConstructor<T>): MethodDecorator {
   return function (target: unknown, key: string, descriptor: PropertyDescriptor) {
     const fn = descriptor.value
@@ -71,8 +55,32 @@ export function ResponseValidator<T>(cls: ClassConstructor<T>): MethodDecorator 
         errors = await validate(result as any, { whitelist: true })
       }
 
-      return responseWrap(result, errors)
+      if (errors.length > 0) {
+        throw new ResponseValidatorException(flattenValidationErrors(errors), result)
+      }
+
+      return result
     }
     return descriptor
+  }
+}
+
+@Injectable()
+export class ValidationPipe implements PipeTransform<any> {
+  async transform(value: any, { metatype }: ArgumentMetadata) {
+    if (!metatype || !this.toValidate(metatype)) {
+      return value
+    }
+    const object = plainToClass(metatype, value)
+    const errors = await validate(object)
+    if (errors.length > 0) {
+      throw new BadRequestException(flattenValidationErrors(errors).join(';'))
+    }
+    return value
+  }
+
+  private toValidate(metatype): boolean {
+    const types = [String, Boolean, Number, Array, Object]
+    return !types.includes(metatype)
   }
 }

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { AppController } from './app.controller'
 import { DevModule } from './dev'
 
 @Module({
@@ -13,8 +14,9 @@ import { DevModule } from './dev'
       mongodbSchemaPath: 'test/data/models',
       modulePath: 'test/data/modules',
       webApiPath: 'test/data/apis',
-      //apiPrefix: 'api',
+      apiPrefix: 'api',
     }),
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
