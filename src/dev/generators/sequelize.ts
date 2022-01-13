@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { compile } from 'nunjucks'
@@ -154,7 +155,7 @@ export class SequelizeGenerator {
     const { ref } = prop
     const refClassName = ref[0].toUpperCase() + ref.slice(1)
     const target = this.schemas.find((s) => s.name === ref)
-    if (!target) throw new Error(`Schema "${ref}" is missing.`)
+    if (!target) throw new HttpException(`Schema "${ref}" is missing.`, HttpStatus.INTERNAL_SERVER_ERROR)
     const relatedField = { name: null, prop: null, isMany: false }
 
     // 如果关联的没有标记为数据表，直接返回类型

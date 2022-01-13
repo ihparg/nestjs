@@ -1,6 +1,6 @@
 {
   "name": "@graphi/nestjs",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "",
   "author": "lobos841@gmail.com",
   "license": "MIT",
@@ -52,7 +52,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "jest": "^27.1.0",
+    "jest": "^27.4.7",
     "onchange": "^7.1.0",
     "openapi-types": "^10.0.0",
     "prettier": "^2.3.2",

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Inject, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Inject, Post } from '@nestjs/common'
 import { DEV_OPTION } from './constants'
 import { DevService } from './dev.service'
 import { ControllerGenerator } from './generators/controller'
@@ -38,7 +38,7 @@ export class RouteController {
     const fullPath = getFullPath(body)
     routes.forEach((route) => {
       if (fullPath === getFullPath(route) && body.id !== route.id) {
-        throw new Error('路径已经存在')
+        throw new HttpException('路径已经存在', HttpStatus.INTERNAL_SERVER_ERROR)
       }
     })
 

@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { compile } from 'nunjucks'
@@ -152,8 +153,8 @@ export class TypeOrmGenerator {
     const { ref } = prop
     const refClassName = ref[0].toUpperCase() + ref.slice(1)
     const target = this.schemas.find((s) => s.name === ref)
-    if (!target) throw new Error(`Schema "${ref}" is missing.`)
-    const relatedField = { name: null, prop: null, isMany: false }
+    if (!target) throw new HttpException(`Schema "${ref}" is missing.`, HttpStatus.INTERNAL_SERVER_ERROR)
+    const relatedField = { name: null, prop: null, isMany: false, hasJoinColumn: false }
 
     // 如果关联的没有标记为数据表，直接返回类型
     if (target.tag !== 'typeorm') {
@@ -163,32 +164,36 @@ export class TypeOrmGenerator {
       }
     }
 
-    Object.keys(target.content.properties).forEach((key) => {
+    for (const key in target.content.properties) {
       const p = target.content.properties[key]
       if (p.ref === this.name) {
         relatedField.name = key
         relatedField.prop = p
+        break
       } else if (p.type === 'array' && p.items[0].ref === this.name) {
         relatedField.name = key
         relatedField.prop = p.items[0]
         relatedField.isMany = true
+        break
       }
-    })
+    }
     let refType = ''
     let isJoinColumn = false
-    if (relatedField.name) {
+
+    if (isMany || relatedField.isMany) {
       if (isMany) {
         refType = relatedField.isMany
           ? `@ManyToMany(() => ${refClassName})\n${this.getJoinTable(refClassName, this.className)}`
-          : `@OneToMany(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
+          : `@OneToMany(() => ${refClassName}, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)})`
       } else {
-        refType = `@ManyToOne(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
+        // eslint-disable-next-line prettier/prettier
+        refType = `@ManyToOne(() => ${refClassName}, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)})`
         isJoinColumn = true
       }
     } else {
-      if (isMany) throw new Error(`没有找到 ${ref}.${name} 的引用`)
+      if (isMany) throw new HttpException(`没有找到 ${ref}.${name} 的引用`, HttpStatus.INTERNAL_SERVER_ERROR)
       refType = `@OneToOne(() => ${refClassName})`
-      isJoinColumn = true
+      isJoinColumn = !!this.schema.content.properties[name + 'Id']
     }
     if (isJoinColumn) refType += `\n@JoinColumn({ name: '${this.convertFieldName(name + 'Id')}' })`
     const jsType = isMany ? `${refClassName}[]` : refClassName

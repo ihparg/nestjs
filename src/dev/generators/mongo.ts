@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { compile } from 'nunjucks'
@@ -86,7 +87,7 @@ export class MongoGenerator {
     const { ref } = prop
     const refClassName = toCapital(ref)
     const target = this.schemas.find((s) => s.name === ref)
-    if (!target) throw new Error(`Schema "${ref}" is missing.`)
+    if (!target) throw new HttpException(`Schema "${ref}" is missing.`, HttpStatus.INTERNAL_SERVER_ERROR)
 
     // 如果关联的没有标记为数据表，直接返回类型
     if (target.tag !== 'mongodb') {
