@@ -192,7 +192,8 @@ export class TypeOrmGenerator {
       }
     } else {
       if (isMany) throw new HttpException(`没有找到 ${ref}.${name} 的引用`, HttpStatus.INTERNAL_SERVER_ERROR)
-      refType = `@OneToOne(() => ${refClassName})`
+      const rls = relatedField.name ? `, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)}` : ''
+      refType = `@OneToOne(() => ${refClassName})${rls}`
       isJoinColumn = !!this.schema.content.properties[name + 'Id']
     }
     if (isJoinColumn) refType += `\n@JoinColumn({ name: '${this.convertFieldName(name + 'Id')}' })`

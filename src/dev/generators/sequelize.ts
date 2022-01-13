@@ -178,24 +178,6 @@ export class SequelizeGenerator {
       }
     })
     const refType = ''
-    /*
-    let isJoinColumn = false
-    if (relatedField.name) {
-      if (isMany) {
-        refType = relatedField.isMany
-          ? `@HasMany(() => ${refClassName}, ${this.convertFieldName(refClassName)})`
-          : `@OneToMany(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
-      } else {
-        refType = `@ManyToOne(() => ${refClassName}, (e) => e.${this.convertFieldName(relatedField.name)})`
-        isJoinColumn = true
-      }
-    } else {
-      if (isMany) throw new Error(`没有找到 ${ref}.${name} 的引用`)
-      refType = `@OneToOne(() => ${refClassName})`
-      isJoinColumn = true
-    }
-    if (isJoinColumn) refType += `\n@JoinColumn({ name: '${this.convertFieldName(name + 'Id')}' })`
-    */
     const jsType = isMany ? `${refClassName}[]` : refClassName
 
     // imports 用
