@@ -14,3 +14,7 @@ export class {{name}} {
   {% endfor %}
 }
 {% endfor %}
+
+{% for name, value in types %}
+export type {{name}} = {{value}}
+{% endfor %}

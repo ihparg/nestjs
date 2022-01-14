@@ -33,12 +33,14 @@ interface Result {
   imports?: string
   params?: Record<string, Field>
   dtos?: Record<string, Dto>
+  ignoreValidator?: boolean
 }
 
 export class DtoGenerator {
   private schemas: { [key: string]: Property }
   private tempRootName: string
   private dtos: Record<string, Dto>
+  private types: Record<string, string>
   private usedValidators: { [key: string]: boolean }
   private dir: string
 
@@ -259,7 +261,11 @@ export class DtoGenerator {
   async writeFile(option: Option, overwrite: boolean) {
     const { module, controller, functionName } = option
     const njk = await readFile(join(__dirname, '../tpl/dto.njk'), 'utf-8')
-    const content = compile(njk).render({ dtos: this.dtos, validators: Object.keys(this.usedValidators).join(',') })
+    const content = compile(njk).render({
+      dtos: this.dtos,
+      types: this.types,
+      validators: Object.keys(this.usedValidators).join(','),
+    })
     const path = join(this.dir, module, controller, 'dto', getFileName(functionName, 'dto') + '.ts')
 
     if (overwrite || !existsSync(path)) {
@@ -269,13 +275,23 @@ export class DtoGenerator {
 
   generate(route: Route, option: Option, overwrite: boolean): Result {
     this.dtos = {}
+    this.types = {}
     this.usedValidators = {}
     const results: Result = {}
 
     const createDto = (prop: Property, name: string) => {
       if (!prop) return
-      const type = this.getDefine(prop, toCapital(option.functionName) + name, true)
-      if (type) results[name + 'Dto'] = type
+      const typeName = toCapital(option.functionName) + name
+      const type = this.getDefine(prop, typeName, true)
+      if (type) {
+        if (type.indexOf(name) >= 0) {
+          results[name + 'Dto'] = type
+        } else {
+          console.log('type', typeName, type)
+          this.types[typeName] = type
+          results[name + 'Dto'] = typeName
+        }
+      }
     }
 
     createDto(route.responseBody, 'Response')
@@ -295,6 +311,7 @@ export class DtoGenerator {
     }
 
     results.dtos = this.dtos
+    results.ignoreValidator = !!this.types[toCapital(option.functionName) + 'Response']
 
     return results
   }

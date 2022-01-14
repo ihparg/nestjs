@@ -14,7 +14,7 @@ export class {{controllerName}}Controller {
   {% for k, v in route.responseHeader %}
   @Header('{{k}}', '{{v}}')
   {% endfor %}
-  {% if route.ResponseDto -%}@ResponseValidator({{route.ResponseDto.replace('[]', '')}}){% endif %}
+  {% if (route.ResponseDto and not route.ignoreValidator) -%}@ResponseValidator({{route.ResponseDto.replace('[]', '')}}){% endif %}
   async {{route.functionName}}(
   {% for p, t in route.params %}@Param('{{p}}') {{p}}: {{t.type}},{% endfor %}
   {% if route.BodyDto %}@Body() body: {{route.BodyDto}},{% endif %}
