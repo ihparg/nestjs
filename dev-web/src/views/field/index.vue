@@ -39,7 +39,8 @@
       >
         ,
       </span>
-      <span v-if="lockRef && value.index" class="index">&lt;Index&gt;</span>
+      <span v-if="lockRef && value.index" class="index">[Index]</span>
+      <span v-if="lockRef && value.unique" class="index">[Unique]</span>
       <span class="comment">{{ extra }}</span>
     </div>
     <div class="list">
@@ -398,7 +399,7 @@ export default {
 
 .index {
   color: $brand-primary-color;
-  margin-left: 1rem;
+  margin-left: 0.5rem;
 }
 
 .editable:hover .name {
@@ -408,7 +409,7 @@ export default {
 .comment {
   color: #999;
   flex: 1;
-  padding-left: 1rem;
+  padding-left: 0.5rem;
 }
 
 .list {

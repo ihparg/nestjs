@@ -10,6 +10,8 @@ export interface Property {
   description?: string
   items?: Array<Property>
   circleRef: string
+  unique?: boolean
+  index?: boolean
   enum?: {
     text: string
     value: string

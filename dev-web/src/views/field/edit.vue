@@ -28,6 +28,14 @@
               type="checkbox"
               label="索引"
               name="index"
+              style="margin-right: 2rem;"
+            />
+
+            <v-input
+              v-if="nodeType !== 'root' && showProps('index') && nodeType !== 'item'"
+              type="checkbox"
+              label="唯一"
+              name="unique"
             />
           </div>
 

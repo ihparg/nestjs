@@ -11,6 +11,7 @@ interface FieldType {
   jsType?: string
   objType?: any
   refType?: string
+  index?: boolean
 }
 
 export class TypeOrmGenerator {
@@ -22,6 +23,7 @@ export class TypeOrmGenerator {
   private schema: Schema
   private schemas: Array<Schema>
   private underscore: boolean
+  private hasIndex: boolean
 
   constructor(schema: Schema, path: string, schemas: Array<Schema>, underscore: boolean) {
     this.relatedTypes = {}
@@ -35,6 +37,7 @@ export class TypeOrmGenerator {
   }
 
   async generate() {
+    this.hasIndex = false
     const njk = await readFile(join(__dirname, '../tpl/typeorm.njk'), 'utf-8')
     const props = this.schema.content.properties
     const options = {
@@ -44,6 +47,7 @@ export class TypeOrmGenerator {
       relatedTypes: Object.keys(this.relatedTypes).join(','),
       imports: this.getImports(),
       tableName: toUnderscore(this.name),
+      hasIndex: this.hasIndex,
     }
     const tpl = compile(njk)
     const content = tpl.render(options)
@@ -129,6 +133,12 @@ export class TypeOrmGenerator {
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
     }
     if (this.underscore) type.sqlType.name = toUnderscore(name)
+    if (prop.unique) type.sqlType.unique = true
+
+    if (prop.index) {
+      this.hasIndex = true
+      type.index = true
+    }
     type.sqlType = JSON.stringify(type.sqlType)
     return type
   }
@@ -214,6 +224,7 @@ export class TypeOrmGenerator {
       refType,
       desc: prop.description,
       required: prop.required,
+      index: prop.index,
       isJoinColumn,
     }
   }
