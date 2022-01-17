@@ -6,7 +6,7 @@ export const getProps = t => {
       break
     case 'decimal':
     case 'double':
-      props = [...props, 'enum', 'minimum', 'maximum', 'defaultValue', 'example']
+      props = [...props, 'enum', 'minimum', 'maximum', 'defaultValue', 'example', 'index']
       break
     case 'array':
       props = [...props, 'maxItems', 'minItems', 'items', 'example']
@@ -27,6 +27,9 @@ export const getProps = t => {
       props = [...props, 'properties']
       break
     case 'uuid':
+      props = [...props, 'index']
+      break
+    case 'datetime':
       props = [...props, 'index']
       break
     default:

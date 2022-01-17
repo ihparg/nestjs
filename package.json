@@ -1,6 +1,6 @@
 {
   "name": "@graphi/nestjs",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "",
   "author": "lobos841@gmail.com",
   "license": "MIT",
@@ -63,6 +63,7 @@
     "ts-loader": "^9.2.5",
     "ts-node": "^10.2.1",
     "tsconfig-paths": "^3.11.0",
+    "typeorm": "^0.2.41",
     "typescript": "^4.4.2",
     "zx": "^4.2.0"
   },

@@ -11,7 +11,7 @@ interface FieldType {
   jsType?: string
   objType?: any
   refType?: string
-  index?: boolean
+  index?: string
 }
 
 export class TypeOrmGenerator {
@@ -137,7 +137,8 @@ export class TypeOrmGenerator {
 
     if (prop.index) {
       this.hasIndex = true
-      type.index = true
+      // eslint-disable-next-line prettier/prettier
+      type.index = `@Index("${prop.unique ? 'uk' : 'idx'}_${type.sqlType.name}", { unique: ${prop.unique ? 'true' : 'false'} })`
     }
     type.sqlType = JSON.stringify(type.sqlType)
     return type
