@@ -109,7 +109,7 @@ export class TypeOrmGenerator {
         break
       case 'datetime':
         type = { jsType: 'Date', sqlType: { type: 'datetime' } }
-        if (prop.defaultValue) type.sqlType.default = `() => '${prop.defaultValue}'`
+        if (prop.defaultValue) type.sqlType.default = `@@@() => '${prop.defaultValue}'@@@`
         break
       case 'biginteger':
         type = { jsType: 'number', sqlType: { type: 'bigint' } }
@@ -144,7 +144,7 @@ export class TypeOrmGenerator {
       // eslint-disable-next-line prettier/prettier
       type.index = `@Index("${prop.unique ? 'uk' : 'idx'}_${type.sqlType.name}", { unique: ${prop.unique ? 'true' : 'false'} })`
     }
-    type.sqlType = JSON.stringify(type.sqlType)
+    type.sqlType = JSON.stringify(type.sqlType).replace('"@@@', '').replace('@@@"', '')
     return type
   }
 
