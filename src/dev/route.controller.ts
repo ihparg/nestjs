@@ -27,7 +27,7 @@ export class RouteController {
 
   @Get('/config')
   getConfig() {
-    return { prefix: this.option.apiPrefix }
+    return { prefix: this.option.apiPrefix, defaultFields: this.option.defaultFields }
   }
 
   @Post('/save')
@@ -58,5 +58,7 @@ export class RouteController {
   @Delete('/')
   async deleteRoute(@Body() body: DeleteBody) {
     await this.devService.deleteFile(this.devService.resolvePath(this.dir, body.id))
+
+    return {}
   }
 }

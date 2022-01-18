@@ -8,7 +8,7 @@
 
       <div style="flex: 1"></div>
     </div>
-    <div class="body">
+    <div v-if="!!config" class="body">
       <v-nav />
       <router-view></router-view>
     </div>
@@ -17,10 +17,21 @@
 </template>
 
 <script>
+import { mapActions, mapState } from 'vuex'
+
 export default {
   name: 'App',
+  computed: {
+    ...mapState('global', ['config']),
+  },
   mounted() {
     this.$message.bind(() => this.$refs.message)
+  },
+  created() {
+    this.fetchConfig()
+  },
+  methods: {
+    ...mapActions('global', { fetchConfig: 'fetchConfig' }),
   },
 }
 </script>

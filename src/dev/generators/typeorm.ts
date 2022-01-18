@@ -109,6 +109,7 @@ export class TypeOrmGenerator {
         break
       case 'datetime':
         type = { jsType: 'Date', sqlType: { type: 'datetime' } }
+        if (prop.defaultValue) type.sqlType.default = `() => '${prop.defaultValue}'`
         break
       case 'biginteger':
         type = { jsType: 'number', sqlType: { type: 'bigint' } }
@@ -123,7 +124,10 @@ export class TypeOrmGenerator {
         type = { sqlType: { type: 'simple-json' } }
         break
       case 'array':
-        type = { sqlType: { type: 'simple-array' } }
+        const st = ['string', 'double', 'biginteger', 'integer', 'uuid'].includes(prop.items[0].type)
+          ? 'simple-array'
+          : 'simple-json'
+        type = { sqlType: { type: st } }
         break
       case 'json':
         type = { jsType: 'any', sqlType: { type: 'json' } }
@@ -165,7 +169,7 @@ export class TypeOrmGenerator {
     const refClassName = ref[0].toUpperCase() + ref.slice(1)
     const target = this.schemas.find((s) => s.name === ref)
     if (!target) throw new HttpException(`Schema "${ref}" is missing.`, HttpStatus.INTERNAL_SERVER_ERROR)
-    const relatedField = { name: null, prop: null, isMany: false, hasJoinColumn: false }
+    const relatedField: any = {} //{ name: null, prop: null, isMany: false, hasJoinColumn: false }
 
     // 如果关联的没有标记为数据表，直接返回类型
     if (target.tag !== 'typeorm') {
@@ -192,6 +196,9 @@ export class TypeOrmGenerator {
     let isJoinColumn = false
 
     if (isMany || relatedField.isMany) {
+      if (!relatedField.name) {
+        throw new HttpException(`没有找到 Book 下 ${this.name} 的引用，代码生成失败`, HttpStatus.INTERNAL_SERVER_ERROR)
+      }
       if (isMany) {
         refType = relatedField.isMany
           ? `@ManyToMany(() => ${refClassName})\n${this.getJoinTable(refClassName, this.className)}`
@@ -202,7 +209,7 @@ export class TypeOrmGenerator {
         isJoinColumn = true
       }
     } else {
-      if (isMany) throw new HttpException(`没有找到 ${ref}.${name} 的引用`, HttpStatus.INTERNAL_SERVER_ERROR)
+      //if (isMany) throw new HttpException(`没有找到 ${ref}.${name} 的引用`, HttpStatus.INTERNAL_SERVER_ERROR)
       const rls = relatedField.name ? `, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)}` : ''
       refType = `@OneToOne(() => ${refClassName}${rls})`
       isJoinColumn = !!this.schema.content.properties[name + 'Id']

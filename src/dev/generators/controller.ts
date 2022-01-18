@@ -54,7 +54,6 @@ export class ControllerGenerator {
       if (sp.length === 0) return param
       const name = `${sp.pop()}${param}`
       if (name && name.indexOf(':') >= 0) return fn(sp, 'By' + toCapital(name.replace(/:/g, '')))
-      // return method.toLowerCase() + toCapital(name)
       return fn(sp, toCapital(name))
     }
 

@@ -15,6 +15,19 @@ import { DevModule } from './dev'
       modulePath: 'test/data/modules',
       webApiPath: 'test/data/apis',
       apiPrefix: 'api',
+      defaultFields: {
+        createAt: {
+          type: 'datetime',
+          index: true,
+          defaultValue: 'CURRENT_TIMESTAMP',
+          required: true,
+        },
+        lastUpdateTime: {
+          type: 'datetime',
+          index: true,
+          defaultValue: 'CURRENT_TIMESTAMP',
+        },
+      },
     }),
   ],
   controllers: [AppController],

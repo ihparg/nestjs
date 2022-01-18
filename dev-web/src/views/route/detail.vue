@@ -38,7 +38,7 @@ export default {
   computed: {
     ...mapGetters('route', { routes: 'sortedRoutes' }),
     ...mapState('schema', { schemas: 'data' }),
-    ...mapState('route', { routeConfig: 'config' }),
+    ...mapState('global', { routeConfig: 'config' }),
     route() {
       if (this.rid === '0') return {}
       return this.routes.find(r => r.id === this.rid)
@@ -58,10 +58,9 @@ export default {
   created() {
     this.fetchRoutes()
     this.fetchSchemas()
-    this.fetchConfig()
   },
   methods: {
-    ...mapActions('route', { fetchRoutes: 'fetchList', fetchConfig: 'fetchConfig' }),
+    ...mapActions('route', { fetchRoutes: 'fetchList' }),
     ...mapActions('schema', { fetchSchemas: 'fetchAll' }),
   },
 }

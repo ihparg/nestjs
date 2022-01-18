@@ -20,11 +20,6 @@ const mutations = {
 }
 
 const actions = {
-  async fetchConfig({ state }) {
-    const config = await fetch.get('/dev/route/config')
-    state.config = config
-  },
-
   async fetchList({ state }) {
     if (state.data) return
     const data = await fetch.get('/dev/route')

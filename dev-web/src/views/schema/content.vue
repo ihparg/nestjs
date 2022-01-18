@@ -138,7 +138,12 @@ export default {
         },
       }),
       active: null,
-      value: { content: { type: 'object', properties: {} } },
+      value: {
+        content: {
+          type: 'object',
+          properties: this.$store.state.global.config.defaultFields || {},
+        },
+      },
     }
   },
   computed: {

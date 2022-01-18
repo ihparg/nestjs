@@ -9,7 +9,7 @@ export interface Property {
   exampleValue?: string
   description?: string
   items?: Array<Property>
-  circleRef: string
+  circleRef?: string
   unique?: boolean
   index?: boolean
   enum?: {
@@ -124,4 +124,6 @@ export interface DevOption {
     debug: (...args: any[]) => void
     error: (...args: any[]) => void
   }
+
+  defaultFields?: Properties
 }
