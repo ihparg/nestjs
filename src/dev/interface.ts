@@ -12,6 +12,7 @@ export interface Property {
   circleRef?: string
   unique?: boolean
   index?: boolean
+  maxLength?: number
   enum?: {
     text: string
     value: string

@@ -96,6 +96,10 @@ export class TypeOrmGenerator {
       case 'uuid':
         type = { jsType: 'string', sqlType: { type: 'uuid' } }
         break
+      case 'boolean':
+        type = { jsType: 'boolean', sqlType: { type: 'boolean' } }
+        if (prop.defaultValue) type.sqlType.default = prop.defaultValue === 'true'
+        break
       case 'integer':
         type = { jsType: 'number', sqlType: { type: 'int' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
@@ -109,7 +113,12 @@ export class TypeOrmGenerator {
         break
       case 'datetime':
         type = { jsType: 'Date', sqlType: { type: 'datetime' } }
-        if (prop.defaultValue) type.sqlType.default = `@@@() => '${prop.defaultValue}'@@@`
+        if (prop.defaultValue) {
+          type.sqlType.default = `@@@() => '${prop.defaultValue}'@@@`
+          if (name.toLowerCase().indexOf('update') >= 0) {
+            type.sqlType.onUpdate = prop.defaultValue
+          }
+        }
         break
       case 'biginteger':
         type = { jsType: 'number', sqlType: { type: 'bigint' } }
@@ -135,6 +144,7 @@ export class TypeOrmGenerator {
       default:
         type = { jsType: prop.type, sqlType: { type: 'varchar' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
+        if (prop.maxLength) type.sqlType.length = prop.maxLength
     }
     if (this.underscore) type.sqlType.name = toUnderscore(name)
     if (prop.unique) type.sqlType.unique = true
