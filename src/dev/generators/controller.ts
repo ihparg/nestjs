@@ -33,8 +33,12 @@ export class ControllerGenerator {
     this.apiPrefix = apiPrefix
   }
 
-  private resolveService(str: string) {
-    const [service, method] = str.split('.')
+  private resolveService(str: string, controller: string) {
+    let [service, method] = str.split('.')
+    if (!method) {
+      method = service
+      service = toCapital(controller) + 'Service'
+    }
     const result = {
       name: getInstanceName(service),
       method,
@@ -46,7 +50,7 @@ export class ControllerGenerator {
     return result
   }
 
-  private splitPath({ path, method, module, controller }) {
+  private splitPath({ path, method, module, controller }: Route) {
     const splitedPath = path.replace(/^\/|\/$/g, '').split('/')
     const prefix = path.indexOf(':') >= 0 ? method.toLowerCase() : ''
 
@@ -157,7 +161,7 @@ export class ControllerGenerator {
       desc: src.title,
       method: toCapital(src.method.toLowerCase()),
       responseHeader: this.handleResponseHeader(src.responseHeaders),
-      service: this.resolveService(src.resolve),
+      service: this.resolveService(src.resolve, controller),
       fullPath: getFullPath(src, this.apiPrefix),
       ...dtos,
       ...sp,
@@ -168,6 +172,7 @@ export class ControllerGenerator {
     if (route.params) this.imports['Param'] = true
 
     await resolveService({
+      controller,
       functionName: route.service.method,
       service: src.resolve,
       dtos,

@@ -13,6 +13,7 @@ const functionTemplate = `
 
 export interface Service {
   dir: string
+  controller: string
   service: string
   functionName: string
   params: { [key: string]: any }
@@ -51,7 +52,11 @@ const createFile = async (data, file) => {
 }
 
 export const resolveService = async (option: Service) => {
-  const [service, method] = option.service.split('.')
+  let [service, method] = option.service.split('.')
+  if (!method) {
+    method = service
+    service = toCapital(option.controller) + 'Service'
+  }
   const serviceName = getFileName(service, 'service')
   const file = join(option.dir, serviceName + '.ts')
 

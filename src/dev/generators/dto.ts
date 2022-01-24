@@ -144,7 +144,7 @@ export class DtoGenerator {
       case 'ref':
         return this.getArrayValidatorType(this.getRef(prop), name)
       default:
-        return `Type(() => ${name})`
+        return `Type(() => ${name.replace('[]', '')})`
     }
   }
 

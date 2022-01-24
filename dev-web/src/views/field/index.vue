@@ -43,7 +43,7 @@
       <span v-if="lockRef && value.unique" class="index">[Unique]</span>
       <span class="comment">{{ extra }}</span>
     </div>
-    <div class="list">
+    <div v-if="!isMissed" class="list">
       <div v-if="childrenVisible" :style="{ display: collapsed ? 'none' : 'block' }">
         <field
           v-for="(f, n) in children"
@@ -76,7 +76,7 @@
         ...
       </div>
     </div>
-    <div v-if="isExpandable">}<span v-if="!isRoot">,</span></div>
+    <div v-if="isExpandable && !isMissed">}<span v-if="!isRoot">,</span></div>
     <div v-if="realValue.type === 'array' && !realValue.circleRef">
       ]<span v-if="!isRoot">,</span>
     </div>
@@ -180,6 +180,8 @@ export default {
       if (type === 'array' || type === 'map') {
         return items
       }
+
+      if (!refField) return []
 
       if (refField.items) return refField.items
 

@@ -101,8 +101,13 @@ export default {
       if (!parent.properties) {
         parent.properties = {}
       }
-      if (value) parent.properties[name] = value
-      else delete parent.properties[name]
+      if (value) {
+        parent.properties[name] = value
+      } else if (parent.type === 'array') {
+        parent.items = [{ type: 'string' }]
+      } else {
+        delete parent.properties[name]
+      }
     },
   },
 }
