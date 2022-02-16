@@ -121,10 +121,11 @@ export interface DevOption {
    */
   apiPrefix?: string
 
-  logger?: {
-    debug: (...args: any[]) => void
-    error: (...args: any[]) => void
-  }
-
   defaultFields?: Properties
+}
+
+export interface DevOptionAsync {
+  imports: any[]
+  useFactory: (...args: any[]) => DevOption
+  inject?: any[]
 }
