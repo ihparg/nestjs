@@ -12,6 +12,7 @@ interface FieldType {
   objType?: any
   refType?: string
   index?: string
+  primaryColumn?: 'PrimaryColumn' | 'PrimaryGeneratedColumn'
 }
 
 export class TypeOrmGenerator {
@@ -155,6 +156,9 @@ export class TypeOrmGenerator {
       type.index = `@Index("${prop.unique ? 'uk' : 'idx'}_${type.sqlType.name}", { unique: ${prop.unique ? 'true' : 'false'} })`
     }
     type.sqlType = JSON.stringify(type.sqlType).replace('"@@@', '').replace('@@@"', '')
+
+    if (name === 'id') type.primaryColumn = type.jsType === 'string' ? 'PrimaryColumn' : 'PrimaryGeneratedColumn'
+
     return type
   }
 
@@ -211,17 +215,22 @@ export class TypeOrmGenerator {
       }
       if (isMany) {
         refType = relatedField.isMany
-          ? `@ManyToMany(() => ${refClassName})\n${this.getJoinTable(refClassName, this.className)}`
-          : `@OneToMany(() => ${refClassName}, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)})`
+          ? `@ManyToMany(() => ${refClassName}, { createForeignKeyConstraints: false })\n${this.getJoinTable(
+              refClassName,
+              this.className,
+            )}`
+          : `@OneToMany(() => ${refClassName}, (e: ${refClassName}) => e.${this.convertFieldName(
+              relatedField.name,
+            )}, { createForeignKeyConstraints: false })`
       } else {
         // eslint-disable-next-line prettier/prettier
-        refType = `@ManyToOne(() => ${refClassName}, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)})`
+        refType = `@ManyToOne(() => ${refClassName}, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)}, { createForeignKeyConstraints: false })`
         isJoinColumn = true
       }
     } else {
       //if (isMany) throw new HttpException(`没有找到 ${ref}.${name} 的引用`, HttpStatus.INTERNAL_SERVER_ERROR)
       const rls = relatedField.name ? `, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)}` : ''
-      refType = `@OneToOne(() => ${refClassName}${rls})`
+      refType = `@OneToOne(() => ${refClassName}${rls}, { createForeignKeyConstraints: false })`
       isJoinColumn = !!this.schema.content.properties[name + 'Id']
     }
     if (isJoinColumn) refType += `\n@JoinColumn({ name: '${this.convertFieldName(name + 'Id')}' })`

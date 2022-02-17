@@ -173,7 +173,9 @@ export class Swagger {
     headers: Property,
     body: Property,
   ): { content: { [media: string]: OpenAPIV3.MediaTypeObject } } {
-    if (!body || !body.properties || Object.keys(body.properties).length === 0) return undefined
+    if (!body || (body.properties && Object.keys(body.properties).length === 0)) {
+      return undefined
+    }
 
     return {
       content: {

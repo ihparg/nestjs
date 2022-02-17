@@ -16,7 +16,7 @@
   {%- endif -%}
 {% endmacro %}
 /** 由 @graphi/nestjs/model.generator.ts 生成，不要手动修改 */
-import { Entity, Column, PrimaryGeneratedColumn{% if (hasIndex) %}, Index{% endif %}{% if (relatedTypes) %}, {{relatedTypes}}{% endif %} } from 'typeorm'
+import { Entity, Column{% if (primaryId) %} ,{{primaryId.primaryColumn}}{% endif %}{% if (hasIndex) %}, Index{% endif %}{% if (relatedTypes) %}, {{relatedTypes}}{% endif %} } from 'typeorm'
 {% for imp in imports -%}
 {{imp|safe}}
 {% endfor %}
@@ -25,7 +25,7 @@ import { Entity, Column, PrimaryGeneratedColumn{% if (hasIndex) %}, Index{% endi
 export class {{name}} {
   {% if (primaryId) %}
   /** 主键 */
-  @PrimaryGeneratedColumn({{primaryId.sqlType|safe}})
+  @{{primaryId.primaryColumn}}({{primaryId.sqlType|safe}})
   id: {{primaryId.jsType}}
   {% endif %}
   {% for field in fields %}
