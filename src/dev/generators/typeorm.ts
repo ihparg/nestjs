@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus } from '@nestjs/common'
 import { readFile } from 'fs/promises'
-import { join } from 'path'
+import { join, relative } from 'path'
 import { compile } from 'nunjucks'
 import { Properties, Property, Schema } from '../interface'
 import { getField as getFieldInterface } from './interface'
-import { writeFileFix, getFileName, toUnderscore } from './utils'
+import { writeFileFix, getFileName, toUnderscore, toCapital } from './utils'
 
 interface FieldType {
   sqlType: any
@@ -16,25 +16,22 @@ interface FieldType {
 }
 
 export class TypeOrmGenerator {
-  private relatedTypes: { [key: string]: boolean }
-  private relatedEntities: { [key: string]: string }
+  private relatedTypes: { [key: string]: boolean } = {}
+  private relatedEntities: { [key: string]: string } = {}
   private name: string
   private className: string
-  private path: string
-  private schema: Schema
-  private schemas: Array<Schema>
-  private underscore: boolean
   private hasIndex: boolean
+  private innerRef: Record<string, boolean> = {}
 
-  constructor(schema: Schema, path: string, schemas: Array<Schema>, underscore: boolean) {
-    this.relatedTypes = {}
-    this.relatedEntities = {}
+  constructor(
+    private readonly schema: Schema,
+    private readonly path: string,
+    private readonly schemas: Array<Schema>,
+    private readonly underscore: boolean,
+    private readonly interfacePath: string,
+  ) {
     this.name = schema.name
-    this.path = path
     this.className = schema.name[0].toUpperCase() + schema.name.slice(1)
-    this.schema = schema
-    this.schemas = schemas
-    this.underscore = underscore
   }
 
   async generate() {
@@ -62,6 +59,10 @@ export class TypeOrmGenerator {
       const file = getFileName(k, 'entity')
       imports.push(`import { ${this.relatedEntities[k]} } from './${file}'`)
     })
+    if (Object.keys(this.innerRef).length > 0) {
+      const path = relative(this.path, this.interfacePath.replace(/\.ts$/, ''))
+      imports.push(`import { ${Object.keys(this.innerRef).join(', ')} } from '${path}'`)
+    }
     return imports
   }
 
@@ -187,6 +188,7 @@ export class TypeOrmGenerator {
 
     // 如果关联的没有标记为数据表，直接返回类型
     if (target.tag !== 'typeorm') {
+      this.innerRef[toCapital(ref)] = true
       return {
         ...getFieldInterface(target.content, name),
         ...this.getType(target.content, name),
