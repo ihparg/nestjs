@@ -14,6 +14,7 @@ import { DevModule } from './dev'
       mongodbSchemaPath: 'test/data/models',
       modulePath: 'test/data/modules',
       webApiPath: 'test/data/apis',
+      webApiFetchPath: 'test/data/apis/fetch',
       apiPrefix: 'api',
       defaultFields: {
         createAt: {

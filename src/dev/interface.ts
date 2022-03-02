@@ -92,6 +92,11 @@ export interface DevOption {
   webApiPath?: string
 
   /**
+   * 前端接口fetch文件路径
+   */
+  webApiFetchPath?: string
+
+  /**
    * typeorm entity 存储目录
    */
   typeormEntityPath?: string
