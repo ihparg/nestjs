@@ -44,12 +44,12 @@ export class RouteController {
 
     await this.devService.saveFile(this.devService.resolvePath(this.dir, body.id), body)
 
-    const { modulePath, schemaPath, webApiPath, webApiFetchPath = '@/utils/fetch' } = this.option
+    const { modulePath, schemaPath, webApiPath } = this.option
     if (modulePath) {
       routes = await this.getList()
       const schemas = await this.devService.getJsonFileList(schemaPath || 'data/schemas')
-      const cg = new ControllerGenerator(routes, schemas, modulePath, this.option.apiPrefix)
-      await cg.generate(body, webApiPath, webApiFetchPath)
+      const cg = new ControllerGenerator(routes, schemas, modulePath, this.option)
+      await cg.generate(body, webApiPath)
     }
 
     return body

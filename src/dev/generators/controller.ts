@@ -2,7 +2,7 @@ import { join } from 'path'
 import { compile } from 'nunjucks'
 import { existsSync } from 'fs'
 import { readFile } from 'fs/promises'
-import { Route, Property, Schema } from '../interface'
+import { Route, Property, Schema, DevOption } from '../interface'
 import { resolvePath } from '../resolvable'
 import { DtoGenerator } from './dto'
 import { getFileName, toCapital, writeFileFix, getInstanceName } from './utils'
@@ -23,14 +23,12 @@ export class ControllerGenerator {
   private imports: { [key: string]: boolean }
   private dtoGenerator: { (): DtoGenerator }
   private dir: string
-  private apiPrefix: string
 
-  constructor(routes: Array<Route>, schemas: Array<Schema>, dir: string, apiPrefix: string) {
+  constructor(routes: Array<Route>, schemas: Array<Schema>, dir: string, private readonly option: DevOption) {
     this.routes = routes
     this.services = {}
     this.dtoGenerator = () => new DtoGenerator(schemas, dir)
     this.dir = dir
-    this.apiPrefix = apiPrefix
   }
 
   private resolveService(str: string, controller: string) {
@@ -95,7 +93,7 @@ export class ControllerGenerator {
     const options = {
       route,
       services: this.services,
-      controllerPath: (this.apiPrefix || '') + '/' + (module ? module + '/' : '') + controller,
+      controllerPath: (this.option.apiPrefix || '') + '/' + (module ? module + '/' : '') + controller,
       controllerName: toCapital(controller),
       imports: Object.keys(this.imports)
         .map((m) => toCapital(m))
@@ -149,7 +147,7 @@ export class ControllerGenerator {
     return compile(njk).render({ route })
   }
 
-  async generate(src: Route, webApiPath: string, fetchPath: string) {
+  async generate(src: Route, webApiPath: string) {
     const { module, controller } = this.splitPath(src)
 
     this.imports = {}
@@ -162,7 +160,7 @@ export class ControllerGenerator {
       method: toCapital(src.method.toLowerCase()),
       responseHeader: this.handleResponseHeader(src.responseHeaders),
       service: this.resolveService(src.resolve, controller),
-      fullPath: getFullPath(src, this.apiPrefix),
+      fullPath: getFullPath(src, this.option.apiPrefix),
       ...dtos,
       ...sp,
     }
@@ -194,11 +192,13 @@ export class ControllerGenerator {
 
     this.createModule(join(this.dir, module, controller, getFileName(controller, 'module') + '.ts'), controller)
 
-    if (webApiPath)
+    if (webApiPath) {
       await createWebApi(
         route,
         join(webApiPath, module, controller, getFileName(route.functionName) + '.ts'),
-        fetchPath,
+        this.option.webApiFetchPath ?? '@/utils/fetch',
+        this.option.webApiHost ?? '',
       )
+    }
   }
 }

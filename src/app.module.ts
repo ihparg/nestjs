@@ -15,7 +15,8 @@ import { DevModule } from './dev'
       modulePath: 'test/data/modules',
       webApiPath: 'test/data/apis',
       webApiFetchPath: 'test/data/apis/fetch',
-      apiPrefix: 'api',
+      webApiHost: '${process.env.HOST}',
+      apiPrefix: '/api',
       defaultFields: {
         createAt: {
           type: 'datetime',
