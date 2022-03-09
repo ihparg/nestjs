@@ -145,7 +145,11 @@ export class TypeOrmGenerator {
         break
       default:
         type = { jsType: prop.type, sqlType: { type: 'varchar' } }
-        if (prop.defaultValue) type.sqlType.default = prop.defaultValue
+        if (prop.defaultValue) {
+          type.sqlType.default = prop.defaultValue
+        } else if (prop.required) {
+          type.sqlType.default = ''
+        }
         if (prop.maxLength) type.sqlType.length = prop.maxLength
     }
     if (this.underscore) type.sqlType.name = toUnderscore(name)
