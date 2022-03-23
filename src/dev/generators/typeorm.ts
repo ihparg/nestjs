@@ -217,7 +217,10 @@ export class TypeOrmGenerator {
 
     if (isMany || relatedField.isMany) {
       if (!relatedField.name) {
-        throw new HttpException(`没有找到 Book 下 ${this.name} 的引用，代码生成失败`, HttpStatus.INTERNAL_SERVER_ERROR)
+        throw new HttpException(
+          `没有找到 ${refClassName} 下 ${this.name} 的引用，代码生成失败`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        )
       }
       if (isMany) {
         refType = relatedField.isMany
