@@ -16,7 +16,7 @@ const getInterfaceName = (name): string => {
   return name[0].toUpperCase() + name.slice(1)
 }
 
-const convertType = (props: Property): string => {
+const convertType = (props: Property, innerRef?: Record<string, boolean>): string => {
   if (props.enum) {
     return props.enum.map((e) => (props.type === 'string' ? '"' + e.value + '"' : e.value)).join('|')
   }
@@ -27,7 +27,9 @@ const convertType = (props: Property): string => {
     case 'double':
       return 'number'
     case 'ref':
-      return getInterfaceName(props.ref)
+      const refType = getInterfaceName(props.ref)
+      if (innerRef) innerRef[refType] = true
+      return refType
     case 'uuid':
     case 'text':
       return 'string'
@@ -42,34 +44,34 @@ const convertType = (props: Property): string => {
   }
 }
 
-export const getField = (prop: Property, name?: string): Field => {
+export const getField = (prop: Property, name?: string, innerRef?: Record<string, boolean>): Field => {
   const field: Field = {
     name,
     required: prop.required,
     desc: prop.description,
-    type: convertType(prop),
+    type: convertType(prop, innerRef),
   }
 
   if (prop.properties && Object.keys(prop.properties).length > 0) {
-    field.fields = getFields(prop.properties)
+    field.fields = getFields(prop.properties, innerRef)
   }
 
   if (prop.items) {
-    field.fields = prop.items.map((i) => getField(i))
+    field.fields = prop.items.map((i) => getField(i, undefined, innerRef))
   }
 
   if (prop.type === 'map') {
     prop.items[0].required = true
-    field.fields = [getField(prop.items[0], '[key: string]')]
+    field.fields = [getField(prop.items[0], '[key: string]', innerRef)]
   }
 
   return field
 }
 
-const getFields = (props: Properties): Array<Field> => {
+const getFields = (props: Properties, innerRef?: Record<string, boolean>): Array<Field> => {
   const fields = []
   Object.keys(props).forEach((name: string) => {
-    fields.push(getField(props[name], name))
+    fields.push(getField(props[name], name, innerRef))
   })
   fields.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
   return fields

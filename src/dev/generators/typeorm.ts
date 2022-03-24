@@ -73,7 +73,7 @@ export class TypeOrmGenerator {
       return this.getRef(prop.items[0], name, true)
     } else {
       return {
-        ...getFieldInterface(prop, name),
+        ...getFieldInterface(prop, name, this.innerRef),
         ...this.getType(prop, name),
       }
     }
@@ -194,7 +194,7 @@ export class TypeOrmGenerator {
     if (target.tag !== 'typeorm') {
       this.innerRef[toCapital(ref)] = true
       return {
-        ...getFieldInterface(target.content, name),
+        ...getFieldInterface(target.content, name, this.innerRef),
         ...this.getType(target.content, name),
       }
     }
