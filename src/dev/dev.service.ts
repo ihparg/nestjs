@@ -33,7 +33,7 @@ export class DevService {
     const dir = join(process.cwd(), path)
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
     const files = await readdir(join(process.cwd(), path))
-    return Promise.all(files.map((file) => this.getJsonFile(join(dir, file))))
+    return Promise.all(files.filter((file) => !file.startsWith('.')).map((file) => this.getJsonFile(join(dir, file))))
   }
 
   async saveFile(path: string, data: any) {
