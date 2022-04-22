@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { readdir, readFile, writeFile, unlink } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
 import { UidFunction, DevOption } from './interface'
-import { Swagger } from './swagger'
+import { Swagger } from './swagger.utils'
 import { DEV_OPTION } from './constants'
 
 @Injectable()
