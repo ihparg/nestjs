@@ -1,5 +1,4 @@
-import { writeFile } from 'fs/promises'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { dirname } from 'path'
 import { customAlphabet } from 'nanoid'
 
@@ -12,7 +11,9 @@ export const mkdirIfNotExist = (path: string) => {
 
 export const writeFileFix = async (path: string, content: string) => {
   mkdirIfNotExist(path)
-  await writeFile(path, content)
+  console.log(`save file: ${path}`)
+  //await writeFile(path, content)
+  writeFileSync(path, content)
 }
 
 export const toCamelCase = (str: string): string => {
