@@ -83,7 +83,7 @@ export class ControllerGenerator {
   async createModule(path, name) {
     if (existsSync(path)) return
     const njk = await readFile(join(__dirname, '../tpl/module.njk'), 'utf-8')
-    const content = compile(njk).render({ className: toCapital(name), name })
+    const content = compile(njk).render({ className: toCapital(name), name: getFileName(name) })
     await writeFileFix(path, content)
   }
 
