@@ -56,7 +56,7 @@ export class ControllerGenerator {
       if (sp.length === 0) return param
       const name = `${sp.pop()}${param}`
       if (name && name.indexOf(':') >= 0) return fn(sp, 'By' + toCapital(name.replace(/:/g, '')))
-      return fn(sp, toCapital(name))
+      return fn(sp, toCapital(name, true))
     }
 
     return {
@@ -157,7 +157,7 @@ export class ControllerGenerator {
     const route: RouteResult = {
       methodContent: undefined,
       desc: src.title,
-      method: toCapital(src.method.toLowerCase()),
+      method: toCapital(src.method.toLowerCase(), true),
       responseHeader: this.handleResponseHeader(src.responseHeaders),
       service: this.resolveService(src.resolve, controller),
       fullPath: getFullPath(src, this.option.apiPrefix),

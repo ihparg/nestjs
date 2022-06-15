@@ -27,8 +27,9 @@ export const toUnderscore = (str: string): string => {
     .replace(/^_/, '')
 }
 
-export const toCapital = (str: string): string => {
+export const toCapital = (str: string, sub = false): string => {
   if (!str || str.length === 0) return ''
+  if (sub) str = str.replace(/\-(\w)/g, (_, letter) => letter.toUpperCase())
   return str[0].toUpperCase() + str.slice(1)
 }
 
