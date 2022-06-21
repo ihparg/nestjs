@@ -22,10 +22,11 @@ const convertType = (props: Property, innerRef?: Record<string, boolean>): strin
   }
   switch (props.type) {
     case 'integer':
-    case 'biginteger':
     case 'decimal':
     case 'double':
       return 'number'
+    case 'biginteger':
+      return 'string'
     case 'ref':
       const refType = getInterfaceName(props.ref)
       if (innerRef) innerRef[refType] = true

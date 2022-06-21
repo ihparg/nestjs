@@ -123,7 +123,7 @@ export class TypeOrmGenerator {
         }
         break
       case 'biginteger':
-        type = { jsType: 'number', sqlType: { type: 'bigint' } }
+        type = { jsType: 'string', sqlType: { type: 'bigint' } }
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'text':
@@ -228,17 +228,15 @@ export class TypeOrmGenerator {
               refClassName,
               this.className,
             )}`
-          : `@OneToMany(() => ${refClassName}, (e: ${refClassName}) => e.${this.convertFieldName(
-              relatedField.name,
-            )}, { createForeignKeyConstraints: false })`
+          : `@OneToMany(() => ${refClassName}, (e: ${refClassName}) => e.${relatedField.name}, { createForeignKeyConstraints: false })`
       } else {
         // eslint-disable-next-line prettier/prettier
-        refType = `@ManyToOne(() => ${refClassName}, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)}, { createForeignKeyConstraints: false })`
+        refType = `@ManyToOne(() => ${refClassName}, (e: ${refClassName}) => e.${relatedField.name}, { createForeignKeyConstraints: false })`
         isJoinColumn = true
       }
     } else {
       //if (isMany) throw new HttpException(`没有找到 ${ref}.${name} 的引用`, HttpStatus.INTERNAL_SERVER_ERROR)
-      const rls = relatedField.name ? `, (e: ${refClassName}) => e.${this.convertFieldName(relatedField.name)}` : ''
+      const rls = relatedField.name ? `, (e: ${refClassName}) => e.${relatedField.name}` : ''
       refType = `@OneToOne(() => ${refClassName}${rls}, { createForeignKeyConstraints: false })`
       isJoinColumn = !!this.schema.content.properties[name + 'Id']
     }

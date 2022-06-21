@@ -162,11 +162,14 @@ export class DtoGenerator {
     const setType = () => {
       switch (prop.type) {
         case 'integer':
-        case 'biginteger':
         case 'decimal':
         case 'double':
           result.push('IsNumber()')
           result.push('Type(() => Number)')
+          break
+        case 'biginteger':
+          result.push('IsNumber()')
+          result.push('Type(() => String)')
           break
         case 'string':
         case 'uuid':
