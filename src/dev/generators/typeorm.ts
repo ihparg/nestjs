@@ -162,7 +162,8 @@ export class TypeOrmGenerator {
     }
     type.sqlType = JSON.stringify(type.sqlType).replace('"@@@', '').replace('@@@"', '')
 
-    if (name === 'id') type.primaryColumn = type.jsType === 'string' ? 'PrimaryColumn' : 'PrimaryGeneratedColumn'
+    const isAutoIncrement = prop.type === 'integer' || prop.type === 'biginteger'
+    if (name === 'id') type.primaryColumn = isAutoIncrement ? 'PrimaryGeneratedColumn' : 'PrimaryColumn'
 
     return type
   }

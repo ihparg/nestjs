@@ -92,10 +92,11 @@ export class DtoGenerator {
 
     switch (prop.type) {
       case 'integer':
-      case 'biginteger':
       case 'decimal':
       case 'double':
         return 'number'
+      case 'biginteger':
+        return 'string'
       case 'string':
       case 'uuid':
       case 'text':
@@ -123,10 +124,10 @@ export class DtoGenerator {
   getArrayValidatorType(prop: Property, name: string): string {
     switch (prop.type) {
       case 'integer':
-      case 'biginteger':
       case 'decimal':
       case 'double':
         return 'Type(() => Number)'
+      case 'biginteger':
       case 'string':
       case 'uuid':
       case 'text':
@@ -168,7 +169,7 @@ export class DtoGenerator {
           result.push('Type(() => Number)')
           break
         case 'biginteger':
-          result.push('IsNumber()')
+          result.push('IsNumberString()')
           result.push('Type(() => String)')
           break
         case 'string':
