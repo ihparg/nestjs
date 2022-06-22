@@ -63,3 +63,23 @@ export const getFullPath = (value, apiPrefix) => {
   fullPath.push(path)
   return `${method}:${fullPath.join('/')}`
 }
+
+export const toCapital = (str, sub = false) => {
+  if (!str || str.length === 0) return ''
+  if (sub) str = str.replace(/-(\w)/g, (_, letter) => letter.toUpperCase())
+  return str[0].toUpperCase() + str.slice(1)
+}
+
+export const getFunctionName = (path, method) => {
+  const splitedPath = path.replace(/^\/|\/$/g, '').split('/')
+  const prefix = path.indexOf(':') >= 0 ? method.toLowerCase() : ''
+
+  const fn = (sp, param) => {
+    if (sp.length === 0) return param
+    const name = `${sp.pop()}${param}`
+    if (name && name.indexOf(':') >= 0) return fn(sp, `By${toCapital(name.replace(/:/g, ''))}`)
+    return fn(sp, toCapital(name, true))
+  }
+
+  return fn(splitedPath, prefix)
+}

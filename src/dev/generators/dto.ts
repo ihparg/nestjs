@@ -196,10 +196,8 @@ export class DtoGenerator {
         case 'map':
           result.push(`Type(() => Object)`)
           break
-        case 'ref':
-          const ref = this.getValidator(this.getRef(prop), name)
-          console.log(ref)
-          return ref
+        case 'blob':
+          break
         default:
           result.push(`Type(() => ${name})`)
           result.push('ValidateNested()')

@@ -60,7 +60,8 @@
           </div>
 
           <v-input
-            label="Service"
+            required
+            label="Service.Method"
             :rules="[rule.required]"
             :suggestions="resolves"
             name="resolve"
@@ -125,7 +126,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import Rule from '@/utils/rule'
-import { getRouteParamsKeys, getAllRefs, getFullPath } from '@/utils/route'
+import { getRouteParamsKeys, getAllRefs, getFullPath, getFunctionName } from '@/utils/route'
 import { fastClone } from '@/utils/clone'
 import fetch from '@/utils/fetch'
 import { registerInput } from '@/components/form'
@@ -287,6 +288,7 @@ export default {
         newProps[key] = properties[key] || { type: 'string' }
       })
       this.value.routeParams = { type: 'object', properties: newProps }
+      this.value.resolve = getFunctionName(path)
     },
     getFullPath(value) {
       return getFullPath(value, this.apiPrefix)
