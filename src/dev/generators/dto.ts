@@ -42,6 +42,7 @@ export class DtoGenerator {
   private dtos: Record<string, Dto>
   private types: Record<string, string>
   private usedValidators: { [key: string]: boolean }
+  private useTransform = false
   private dir: string
 
   constructor(schemas: Array<Schema>, dir: string) {
@@ -184,7 +185,7 @@ export class DtoGenerator {
           break
         case 'boolean':
           result.push('IsBoolean()')
-          result.push('Type(() => Boolean)')
+          result.push(`Transform(({ value }) => value === 'false' ? false : !! value)`)
           break
         case 'array':
           result.push('IsArray()')
@@ -216,7 +217,8 @@ export class DtoGenerator {
 
     result.forEach((r) => {
       const k = r.replace(/\(.*/g, '')
-      if (k !== 'Type') this.usedValidators[k] = true
+      if (k !== 'Type' && k !== 'Transform') this.usedValidators[k] = true
+      if (k === 'Transform') this.useTransform = true
     })
 
     return Array.from(new Set(result))
@@ -267,6 +269,7 @@ export class DtoGenerator {
       dtos: this.dtos,
       types: this.types,
       validators: Object.keys(this.usedValidators).join(','),
+      hasTransform: this.useTransform,
     })
     const path = join(this.dir, module, controller, 'dto', getFileName(functionName, 'dto') + '.ts')
 
@@ -279,6 +282,7 @@ export class DtoGenerator {
     this.dtos = {}
     this.types = {}
     this.usedValidators = {}
+    this.useTransform = false
     const results: Result = {}
 
     const createDto = (prop: Property, name: string) => {

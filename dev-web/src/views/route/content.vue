@@ -190,6 +190,7 @@ export default {
           length[key] = this.value[key].properties
             ? Object.keys(this.value[key].properties).length
             : 1
+          if (this.value[key].items) length[key] = 1
         } else {
           length[key] = 0
         }
