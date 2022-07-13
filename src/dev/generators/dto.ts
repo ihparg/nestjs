@@ -185,7 +185,7 @@ export class DtoGenerator {
           break
         case 'boolean':
           result.push('IsBoolean()')
-          result.push(`Transform(({ value }) => value === 'false' ? false : !! value)`)
+          result.push(`Transform(({ value }) => (value == null ? undefined : value === 'false' ? false : !!value))`)
           break
         case 'array':
           result.push('IsArray()')
