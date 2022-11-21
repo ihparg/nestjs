@@ -5,7 +5,7 @@ import { compile } from 'nunjucks'
 import { getFileName, toCapital } from './utils'
 
 const functionTemplate = `
-  async {{functionName}}({{params}}): Promise<{{response}}> {
+  async {{functionName}}({{params}}){% if response %}: Promise<{{response}}>{% endif %} {
     // Write your code here.
     return null
   }

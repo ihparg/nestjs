@@ -1,17 +1,15 @@
 import fetch from '{{fetchPath}}'
-
-{% for name, dto in dtos %}
-{% if dto.desc %}/** {{dto.desc}} */{% endif %}
-export interface {{name}} {
-  {% for field, prop in dto.fields %}
-  {% if prop.desc %}/** {{prop.desc}} */{% endif %}
-  {{field}}{%if not(prop.required)%}?{% endif %}: {{prop.type|safe}}
-  {% endfor %}
-}
+{% for name, dto in dtos %}{% if dto.desc %} /** {{dto.desc}} */{% endif %}export interface {{name}}
+  {
+    {% for field, prop in dto.fields %}
+      {% if prop.desc %} /** {{prop.desc}} */{% endif %}{{field}}{%if not(prop.required)%}
+          ?
+        {% endif %}
+        : {{prop.type|safe}}
+      {% endfor %}
+  }
 {% endfor %}
-
 {% if request %}
-export default (data: {{request}}): Promise<{{response}}> => fetch.{{method}}(`{{url}}`, data)
+  export default(data: {{request}}){%- if response -%}: Promise < {{response}} >{%- endif %} => fetch.{{method}}(`{{url}}`, data)
 {% else %}
-export default (): Promise<{{response}}> => fetch.{{method}}('{{url}}')
-{% endif %}
+  export default(){%- if response -%}: Promise < {{response}} >{%- endif %} => fetch.{{method}}('{{url}}'){% endif %}

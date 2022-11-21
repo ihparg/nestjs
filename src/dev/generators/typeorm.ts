@@ -155,10 +155,16 @@ export class TypeOrmGenerator {
     if (this.underscore) type.sqlType.name = toUnderscore(name)
     if (prop.unique) type.sqlType.unique = true
 
+    if (prop.enum) {
+      type.jsType = prop.enum.map((e) => (prop.type === 'string' ? '"' + e.value + '"' : e.value)).join('|')
+    }
+
     if (prop.index) {
       this.hasIndex = true
       // eslint-disable-next-line prettier/prettier
-      type.index = `@Index("${prop.unique ? 'uk' : 'idx'}_${type.sqlType.name}", { unique: ${prop.unique ? 'true' : 'false'} })`
+      type.index = `@Index("${prop.unique ? 'uk' : 'idx'}_${type.sqlType.name}", { unique: ${
+        prop.unique ? 'true' : 'false'
+      } })`
     }
     type.sqlType = JSON.stringify(type.sqlType).replace('"@@@', '').replace('@@@"', '')
 

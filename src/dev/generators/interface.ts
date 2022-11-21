@@ -81,15 +81,25 @@ const getFields = (props: Properties, innerRef?: Record<string, boolean>): Array
 export const generateInterface = async (schemas: Array<Schema>, filePath: string) => {
   const njk = await readFile(join(__dirname, '../tpl/interface.njk'), 'utf-8')
   const tpl = compile(njk)
-  const list = schemas.map((schema: Schema) => {
+  const list = []
+  const types = []
+  schemas.forEach((schema: Schema) => {
     schema.iname = getInterfaceName(schema.name)
-    return {
-      iname: getInterfaceName(schema.name),
-      desc: schema.description,
-      fields: getFields(schema.content.properties),
+    if (schema.content.properties) {
+      list.push({
+        iname: getInterfaceName(schema.name),
+        desc: schema.description,
+        fields: getFields(schema.content.properties),
+      })
+    } else {
+      types.push({
+        iname: getInterfaceName(schema.name),
+        desc: schema.description,
+        field: getField(schema.content),
+      })
     }
   })
-  const content = tpl.render({ schemas: list })
+  const content = tpl.render({ schemas: list, types })
   await writeFileFix(filePath, content)
 }
 
