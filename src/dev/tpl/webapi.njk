@@ -2,10 +2,8 @@ import fetch from '{{fetchPath}}'
 {% for name, dto in dtos %}{% if dto.desc %} /** {{dto.desc}} */{% endif %}export interface {{name}}
   {
     {% for field, prop in dto.fields %}
-      {% if prop.desc %} /** {{prop.desc}} */{% endif %}{{field}}{%if not(prop.required)%}
-          ?
-        {% endif %}
-        : {{prop.type|safe}}
+      {% if prop.desc %} /** {{prop.desc}} */{% endif %}
+      {{field}}{%if not(prop.required)%}?{% endif %}: {{prop.type|safe}}
       {% endfor %}
   }
 {% endfor %}
