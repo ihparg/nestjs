@@ -124,7 +124,7 @@ export class ControllerGenerator {
         line = this.getCommonImports(line)
       }
       lines.push(line)
-      if (line.indexOf('import ') < 0 && stage === 0) {
+      if (line.indexOf('} from ') < 0 && stage === 0) {
         if (route.imports && content.indexOf(route.dtoFileName) < 0) {
           lines.splice(lines.length - 1, 0, route.imports)
         }

@@ -13,7 +13,10 @@ export function UnTransform() {
 
 @Injectable()
 export class TransformInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<Response<any>> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<Response<any>> | Promise<Observable<Response<any>>> {
     return next.handle().pipe(
       map((data) => {
         const ignore = Reflect.getMetadata(UN_TRANSFORM, context.getHandler())

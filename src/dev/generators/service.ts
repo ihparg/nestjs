@@ -27,7 +27,7 @@ const appendToFile = async (data, file) => {
   const list = content.replace(/[\s|\n]+$/g, '').split('\n')
   list.forEach((line, i) => {
     lines.push(line)
-    if (line.indexOf('import ') < 0 && stage === 0) {
+    if (line.indexOf('} from ') < 0 && stage === 0) {
       if (data.imports && content.indexOf(data.dtoFileName) < 0) {
         lines.splice(lines.length - 1, 0, data.imports)
       }
