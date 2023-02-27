@@ -114,7 +114,7 @@ export class DtoGenerator {
       case 'array':
         return this.getDefine(prop.items[0], name) + '[]'
       case 'map':
-        return `Map<string, ${this.getDefine(prop.items[0], name)}>`
+        return `{ [key:string]: ${this.getDefine(prop.items[0], name)} }`
       default:
         console.error('unknow type ' + prop.type, name)
         return 'undefined'
