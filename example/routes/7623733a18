@@ -1,0 +1,55 @@
+{
+  "method": "GET",
+  "module": "front",
+  "path": "list2",
+  "requestBody": {
+    "type": "object",
+    "properties": {}
+  },
+  "queryString": {
+    "type": "object",
+    "properties": {}
+  },
+  "requestHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "responseBody": {
+    "type": "array",
+    "items": [
+      {
+        "type": "ref",
+        "properties": {
+          "id": {
+            "ref": "User.id"
+          },
+          "age": {
+            "ref": "User.age"
+          },
+          "json": {
+            "ref": "User.json"
+          },
+          "decimal": {
+            "ref": "User.decimal"
+          }
+        },
+        "ref": "User"
+      }
+    ]
+  },
+  "responseHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "controller": "user",
+  "routeParams": {
+    "type": "object",
+    "properties": {}
+  },
+  "resolve": "UserService.getList",
+  "title": "前端接口",
+  "refs": [
+    "2c8f3248bf"
+  ],
+  "id": "7623733a18"
+}

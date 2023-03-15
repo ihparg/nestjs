@@ -1,0 +1,89 @@
+{
+  "method": "GET",
+  "module": "",
+  "path": "list",
+  "requestBody": {
+    "type": "object",
+    "properties": {}
+  },
+  "queryString": {
+    "type": "object",
+    "properties": {}
+  },
+  "requestHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "responseBody": {
+    "type": "array",
+    "items": [
+      {
+        "type": "ref",
+        "properties": {
+          "id": {
+            "ref": "Shop.id"
+          },
+          "address": {
+            "ref": "Shop.address"
+          },
+          "user": {
+            "required": false,
+            "ref": "Shop.user",
+            "properties": {
+              "id": {
+                "ref": "User.id"
+              },
+              "age": {
+                "ref": "User.age"
+              },
+              "json": {
+                "ref": "User.json"
+              },
+              "map": {
+                "ref": "User.map"
+              },
+              "decimal": {
+                "ref": "User.decimal"
+              },
+              "shop": {
+                "required": false,
+                "ref": "User.shop",
+                "properties": {
+                  "id": {
+                    "ref": "Shop.id"
+                  },
+                  "address": {
+                    "ref": "Shop.address"
+                  },
+                  "user": {
+                    "required": false,
+                    "ref": "Shop.user",
+                    "properties": {},
+                    "circleRef": ".0.user"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ref": "Shop"
+      }
+    ]
+  },
+  "responseHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "controller": "shop",
+  "routeParams": {
+    "type": "object",
+    "properties": {}
+  },
+  "resolve": "ShopService.getList",
+  "title": "获取店铺列表",
+  "refs": [
+    "cf022e4162",
+    "2c8f3248bf"
+  ],
+  "id": "82b992abc8"
+}

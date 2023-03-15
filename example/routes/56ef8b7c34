@@ -1,0 +1,42 @@
+{
+  "method": "GET",
+  "module": "",
+  "path": "other",
+  "queryString": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "required": false,
+        "unique": false,
+        "type": "string"
+      }
+    }
+  },
+  "requestHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "responseBody": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "required": false,
+        "unique": false,
+        "type": "string"
+      }
+    }
+  },
+  "responseHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "controller": "user",
+  "routeParams": {
+    "type": "object",
+    "properties": {}
+  },
+  "resolve": "Other",
+  "title": "xxxx",
+  "refs": [],
+  "id": "56ef8b7c34"
+}

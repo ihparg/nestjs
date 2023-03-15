@@ -1,0 +1,41 @@
+{
+  "content": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "required": false,
+        "type": "biginteger"
+      },
+      "name": {
+        "required": true,
+        "index": true,
+        "type": "string",
+        "unique": true,
+        "description": "mvp"
+      },
+      "createTime": {
+        "required": true,
+        "index": true,
+        "type": "datetime",
+        "unique": false,
+        "defaultValue": "CURRENT_TIMESTAMP"
+      },
+      "long": {
+        "required": true,
+        "index": false,
+        "unique": false,
+        "type": "string",
+        "maxLength": "4000"
+      },
+      "type": {
+        "required": false,
+        "type": "ref",
+        "properties": {},
+        "ref": "BugType"
+      }
+    }
+  },
+  "tag": "typeorm",
+  "name": "Book",
+  "id": "5d1aa28c79"
+}

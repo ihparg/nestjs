@@ -1,0 +1,69 @@
+{
+  "module": "admin",
+  "controller": "user",
+  "path": "createUser",
+  "method": "POST",
+  "requestBody": {
+    "type": "ref",
+    "properties": {
+      "id": {
+        "ref": "User.id"
+      },
+      "age": {
+        "ref": "User.age"
+      },
+      "json": {
+        "ref": "User.json"
+      },
+      "decimal": {
+        "ref": "User.decimal"
+      },
+      "map": {
+        "required": false,
+        "ref": "User.map",
+        "items": [
+          {
+            "type": "ref",
+            "ref": "User.map.0"
+          }
+        ]
+      }
+    },
+    "ref": "User"
+  },
+  "routeParams": {
+    "type": "object",
+    "properties": {}
+  },
+  "queryString": {
+    "type": "object",
+    "properties": {}
+  },
+  "requestHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "responseBody": {
+    "type": "ref",
+    "properties": {
+      "code": {
+        "ref": "response.code"
+      },
+      "message": {
+        "ref": "response.message"
+      }
+    },
+    "ref": "response"
+  },
+  "responseHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "resolve": "UserService.createUser",
+  "title": "创建用户",
+  "refs": [
+    "2c8f3248bf",
+    "aeb203fc4c"
+  ],
+  "id": "59699bf296"
+}

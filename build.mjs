@@ -1,14 +1,11 @@
 const fs = require('fs/promises')
 
 await $`rm -rf publish`
+await $`pnpm --parallel run build`
+await $`cp -r ./packages/dev/dist/dev ./publish`
+await $`cp -r ./packages/web/dist ./publish/public`
 
-await $`nest build`
-
-await $`cd dev-web && yarn && yarn build`
-
-await $`cp -r ./dist/dev ./publish`
-
-const json = JSON.parse(await fs.readFile('./package.json', 'utf-8'))
+const json = JSON.parse(await fs.readFile('./packages/dev/package.json', 'utf-8'))
 delete json.devDependencies
 delete json.jest
 delete json.scripts

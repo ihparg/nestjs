@@ -1,0 +1,26 @@
+{
+  "content": {
+    "type": "object",
+    "properties": {
+      "_id": {
+        "required": true,
+        "index": true,
+        "type": "uuid"
+      },
+      "content": {
+        "required": true,
+        "index": false,
+        "type": "string"
+      },
+      "user": {
+        "required": false,
+        "index": false,
+        "type": "string"
+      }
+    }
+  },
+  "tag": "mongodb",
+  "name": "Comment",
+  "description": "评论",
+  "id": "14561f7e24"
+}

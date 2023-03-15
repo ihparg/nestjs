@@ -1,0 +1,65 @@
+{
+  "method": "POST",
+  "module": "",
+  "path": "app/post-file",
+  "requestHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "responseBody": {
+    "type": "ref",
+    "properties": {
+      "createAt": {
+        "ref": "hello.createAt"
+      },
+      "lastUpdateTime": {
+        "ref": "hello.lastUpdateTime"
+      }
+    },
+    "ref": "hello"
+  },
+  "responseHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "controller": "app",
+  "routeParams": {
+    "type": "object",
+    "properties": {}
+  },
+  "resolve": "AppPostFile",
+  "requestBody": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "required": false,
+        "type": "blob"
+      },
+      "user": {
+        "required": false,
+        "type": "ref",
+        "properties": {
+          "id": {
+            "ref": "User.id"
+          },
+          "age": {
+            "ref": "User.age"
+          },
+          "json": {
+            "ref": "User.json"
+          },
+          "decimal": {
+            "ref": "User.decimal"
+          }
+        },
+        "ref": "User"
+      }
+    }
+  },
+  "title": "上传文件",
+  "refs": [
+    "2c8f3248bf",
+    "23cf30a438"
+  ],
+  "id": "0797f834b2"
+}

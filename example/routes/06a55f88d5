@@ -1,0 +1,69 @@
+{
+  "method": "GET",
+  "module": "",
+  "path": "getUser",
+  "queryString": {
+    "type": "object",
+    "properties": {}
+  },
+  "requestHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "responseBody": {
+    "type": "ref",
+    "properties": {
+      "id": {
+        "ref": "User.id"
+      },
+      "age": {
+        "ref": "User.age"
+      },
+      "json": {
+        "ref": "User.json"
+      },
+      "decimal": {
+        "ref": "User.decimal"
+      },
+      "object": {
+        "required": false,
+        "ref": "User.object",
+        "properties": {
+          "firstName": {
+            "ref": "name.firstName"
+          },
+          "lastName": {
+            "ref": "name.lastName"
+          }
+        }
+      },
+      "map": {
+        "required": false,
+        "ref": "User.map",
+        "items": [
+          {
+            "type": "ref",
+            "ref": "User.map.0"
+          }
+        ]
+      }
+    },
+    "ref": "User"
+  },
+  "responseHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "controller": "userInfo",
+  "routeParams": {
+    "type": "object",
+    "properties": {}
+  },
+  "resolve": "getUser",
+  "title": "用户信息",
+  "refs": [
+    "2c8f3248bf",
+    "31b6830da7"
+  ],
+  "id": "06a55f88d5"
+}

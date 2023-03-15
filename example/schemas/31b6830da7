@@ -1,0 +1,22 @@
+{
+  "content": {
+    "type": "object",
+    "properties": {
+      "firstName": {
+        "required": false,
+        "index": false,
+        "type": "string",
+        "minLength": "2",
+        "maxLength": "10"
+      },
+      "lastName": {
+        "required": false,
+        "type": "string",
+        "index": false
+      }
+    }
+  },
+  "tag": "",
+  "name": "name",
+  "id": "31b6830da7"
+}

@@ -1,0 +1,34 @@
+{
+  "method": "GET",
+  "module": "admin",
+  "path": "single",
+  "queryString": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "required": false,
+        "type": "integer"
+      }
+    }
+  },
+  "requestHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "responseBody": {
+    "type": "boolean"
+  },
+  "responseHeaders": {
+    "type": "object",
+    "properties": {}
+  },
+  "controller": "user",
+  "routeParams": {
+    "type": "object",
+    "properties": {}
+  },
+  "title": "单类型",
+  "resolve": "UserService.single",
+  "refs": [],
+  "id": "86483aa83c"
+}
