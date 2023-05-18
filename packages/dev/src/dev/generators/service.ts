@@ -1,6 +1,6 @@
-import { join } from 'path'
+import { join, dirname } from 'path'
 import { existsSync } from 'fs'
-import { readFile, writeFile } from 'fs/promises'
+import { readFile, writeFile, mkdir } from 'fs/promises'
 import { compile } from 'nunjucks'
 import { getFileName, toCapital } from './utils'
 
@@ -45,9 +45,22 @@ const appendToFile = async (data, file) => {
   if (stage === 4) await writeFile(file, lines.join('\n'))
 }
 
-const createFile = async (data, file) => {
+const createFile = async (data: any, file: string) => {
   const njk = await readFile(join(__dirname, '../tpl/service.njk'), 'utf-8')
   const content = compile(njk).render(data)
+
+  // 获取文件夹路径
+  const folderPath = dirname(file)
+
+  // 如果文件夹不存在，创建文件夹
+  try {
+    await mkdir(folderPath, { recursive: true })
+  } catch (err) {
+    if (err.code !== 'EEXIST') {
+      throw err
+    }
+  }
+
   await writeFile(file, content)
 }
 

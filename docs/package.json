@@ -1,0 +1,19 @@
+{
+  "name": "docs",
+  "version": "0.0.1",
+  "description": "nestjs 脚手架文档",
+  "main": "index.js",
+  "authors": {
+    "name": "lobos",
+    "email": "lobos841@gmail.com"
+  },
+  "repository": "/docs",
+  "scripts": {
+    "dev": "vuepress dev src",
+    "build": "vuepress build src"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "vuepress": "^1.5.3"
+  }
+}
