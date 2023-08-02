@@ -147,7 +147,7 @@ export class ControllerGenerator {
     return compile(njk).render({ route })
   }
 
-  async generate(src: Route, webApiPath: string) {
+  async generate(src: Route, webApiPath: string | string[]) {
     const { module, controller } = this.splitPath(src)
 
     this.imports = {}
@@ -193,12 +193,15 @@ export class ControllerGenerator {
     this.createModule(join(this.dir, module, controller, getFileName(controller, 'module') + '.ts'), controller)
 
     if (webApiPath) {
-      await createWebApi(
-        route,
-        join(webApiPath, module, controller, getFileName(route.functionName) + '.ts'),
-        this.option.webApiFetchPath ?? '@/utils/fetch',
-        this.option.webApiHost ?? '',
-      )
+      if (typeof webApiPath === 'string') webApiPath = [webApiPath]
+      for await (const p of webApiPath) {
+        await createWebApi(
+          route,
+          join(p, module, controller, getFileName(route.functionName) + '.ts'),
+          this.option.webApiFetchPath ?? '@/utils/fetch',
+          this.option.webApiHost ?? '',
+        )
+      }
     }
   }
 }

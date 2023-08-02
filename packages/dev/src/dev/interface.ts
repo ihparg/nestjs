@@ -89,7 +89,7 @@ export interface DevOption {
   /**
    * 前端接口文件目录
    */
-  webApiPath?: string
+  webApiPath?: string | string[]
 
   /**
    * 前端接口fetch文件路径
