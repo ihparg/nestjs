@@ -140,6 +140,7 @@ export class MongoGenerator {
         type = { jsType: 'any', sqlType: {} }
         break
       case 'datetime':
+      case 'timestamp':
         type = { jsType: 'Date', sqlType: `{ type: Date }` }
         break
       case 'ref':

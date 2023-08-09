@@ -151,6 +151,7 @@ export default {
         case 'boolean':
           return value || mock('@boolean')
         case 'datetime':
+        case 'timestamp':
           return `"${value || mock('@datetime')}"` // '"2000-01-01 00:00:00"'
         case 'integer':
           return value || 0
@@ -198,7 +199,7 @@ export default {
       if (this.disabled) {
         Object.keys(properties)
           .sort()
-          .forEach(k => {
+          .forEach((k) => {
             if (fields[k]) newChildren[k] = { ...fields[k], ...properties[k] }
             else newChildren[k] = properties[k]
           })
@@ -207,7 +208,7 @@ export default {
       } else {
         Object.keys(fields)
           .sort()
-          .forEach(k => {
+          .forEach((k) => {
             const field = fields[k]
             newChildren[k] = {
               ...field,
@@ -218,7 +219,7 @@ export default {
           })
         Object.keys(properties)
           .sort()
-          .forEach(k => {
+          .forEach((k) => {
             if (!(k in newChildren)) {
               newChildren[k] = properties[k]
             }
@@ -236,7 +237,7 @@ export default {
       if (props.enum) {
         txt.push(
           `选项: [${props.enum
-            .map(e => `${e.value}${e.text == null ? '' : `: ${e.text}`}`)
+            .map((e) => `${e.value}${e.text == null ? '' : `: ${e.text}`}`)
             .join(', ')}]`,
         )
       }
@@ -284,7 +285,7 @@ export default {
         } else if (field.type === 'ref') {
           const schema = this.flattenedSchemas[field.ref].properties
           if (schema) {
-            Object.keys(schema).forEach(f => {
+            Object.keys(schema).forEach((f) => {
               if (!['ref', 'object', 'array'].includes(schema[f].type))
                 newValue.properties[f] = { ref: `${field.ref}.${f}` }
             })
@@ -326,6 +327,9 @@ export default {
 .decimal,
 .number,
 .double {
+  color: #2973b7;
+}
+.timestamp {
   color: #2973b7;
 }
 

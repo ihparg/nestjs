@@ -114,7 +114,8 @@ export class TypeOrmGenerator {
         if (prop.defaultValue) type.sqlType.default = prop.defaultValue
         break
       case 'datetime':
-        type = { jsType: 'Date', sqlType: { type: 'datetime' } }
+      case 'timestamp':
+        type = { jsType: 'Date', sqlType: { type: prop.type } }
         if (prop.defaultValue) {
           type.sqlType.default = `@@@() => '${prop.defaultValue}'@@@`
           if (name.toLowerCase().indexOf('update') >= 0) {

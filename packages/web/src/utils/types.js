@@ -13,11 +13,13 @@ export const MAP = 'map'
 export const ARRAY = 'array'
 export const BLOB = 'blob'
 export const UUID = 'uuid'
+export const TIMESTAMP = 'timestamp'
 
 export const allTypes = [
   ARRAY,
   BOOLEAN,
   DATETIME,
+  TIMESTAMP,
   DECIMAL,
   INTEGER,
   BIGINTEGER,

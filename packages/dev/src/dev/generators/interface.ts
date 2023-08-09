@@ -35,6 +35,7 @@ const convertType = (props: Property, innerRef?: Record<string, boolean>): strin
     case 'text':
       return 'string'
     case 'datetime':
+    case 'timestamp':
       return 'Date'
     case 'json':
       return 'any'

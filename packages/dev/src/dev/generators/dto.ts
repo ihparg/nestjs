@@ -103,6 +103,7 @@ export class DtoGenerator {
       case 'text':
         return 'string'
       case 'datetime':
+      case 'timestamp':
         return 'Date'
       case 'boolean':
         return 'boolean'
@@ -180,6 +181,7 @@ export class DtoGenerator {
           result.push('Type(() => String)')
           break
         case 'datetime':
+        case 'timestamp':
           result.push('IsDate()')
           result.push('Type(() => Date)')
           break
