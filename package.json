@@ -1,6 +1,6 @@
 {
   "name": "nestjs-dev",
-  "version": "0.3.5",
+  "version": "0.3.7",
   "description": "nestjs 脚手架",
   "main": "index.js",
   "scripts": {

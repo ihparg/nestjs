@@ -101,8 +101,8 @@ export class Swagger {
     }
 
     if (type === 'object') {
-      result.properties = this.getFieldSchemaObject(property.properties)
-      result.required = Object.keys(property.properties).filter((k) => {
+      result.properties = this.getFieldSchemaObject(property.properties || {})
+      result.required = Object.keys(property.properties || {}).filter((k) => {
         return property.properties[k].required
       })
     }
